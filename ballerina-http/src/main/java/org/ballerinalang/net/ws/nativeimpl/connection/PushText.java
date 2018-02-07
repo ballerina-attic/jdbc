@@ -16,46 +16,47 @@
  *  under the License.
  */
 
-package org.ballerinalang.net.ws.nativeimpl;
+package org.ballerinalang.net.ws.nativeimpl.connection;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeKind;
-import org.ballerinalang.model.values.BMap;
-import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.AbstractNativeFunction;
+import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.natives.annotations.ReturnType;
 import org.ballerinalang.net.ws.Constants;
+import org.ballerinalang.util.exceptions.BallerinaException;
 
-import java.util.Map;
+import javax.websocket.Session;
 
 /**
- * Get all the upgrade headers.
+ * Push text to the other end of the connection.
  *
  * @since 0.94
  */
 
 @BallerinaFunction(
         packageName = "ballerina.net.ws",
-        functionName = "getUpgradeHeaders",
+        functionName = "pushText",
         receiver = @Receiver(type = TypeKind.STRUCT, structType = "Connection",
                              structPackage = "ballerina.net.ws"),
-        returnType = {@ReturnType(type = TypeKind.MAP)},
+        args = {@Argument(name = "text", type = TypeKind.STRING)},
         isPublic = true
 )
-public class GetUpgradeHeaders extends AbstractNativeFunction {
+public class PushText extends AbstractNativeFunction {
 
     @Override
     public BValue[] execute(Context context) {
-        BStruct wsConnection = (BStruct) getRefArgument(context, 0);
-        Map<String, String> upgradeHeaders =
-                (Map<String, String>) wsConnection.getNativeData(Constants.NATIVE_DATA_UPGRADE_HEADERS);
-        BMap<String, BString> bUpgradeHeaders = new BMap<>();
-        upgradeHeaders.entrySet().forEach(
-                upgradeHeader -> bUpgradeHeaders.put(upgradeHeader.getKey(), new BString(upgradeHeader.getValue())));
-        return getBValues(bUpgradeHeaders);
+        try {
+            BStruct wsConnection = (BStruct) getRefArgument(context, 0);
+            Session session = (Session) wsConnection.getNativeData(Constants.NATIVE_DATA_WEBSOCKET_SESSION);
+            String text = getStringArgument(context, 0);
+            session.getBasicRemote().sendText(text);
+        } catch (Throwable e) {
+            throw new BallerinaException("Cannot send the message. Error occurred.");
+        }
+        return VOID_RETURN;
     }
 }
