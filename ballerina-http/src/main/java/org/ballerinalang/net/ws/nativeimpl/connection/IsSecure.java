@@ -15,35 +15,43 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.ballerinalang.nativeimpl.builtin.datatablelib;
+
+package org.ballerinalang.net.ws.nativeimpl.connection;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BBoolean;
-import org.ballerinalang.model.values.BDataTable;
+import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.AbstractNativeFunction;
-import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
+import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.natives.annotations.ReturnType;
+import org.ballerinalang.net.ws.Constants;
+
+import javax.websocket.Session;
 
 /**
- * Native function to check record availability in datatable.
- * ballerina.model.datatables:hasNext(datatable)
+ * Check whether the connection is secure connection or not.
  *
- * @since 0.8.0
+ * @since 0.94
  */
+
 @BallerinaFunction(
-        packageName = "ballerina.builtin",
-        functionName = "datatable.hasNext",
-        args = {@Argument(name = "dt", type = TypeKind.DATATABLE)},
+        packageName = "ballerina.net.ws",
+        functionName = "isSecure",
+        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Connection",
+                             structPackage = "ballerina.net.ws"),
         returnType = {@ReturnType(type = TypeKind.BOOLEAN)},
         isPublic = true
 )
-public class HasNext extends AbstractNativeFunction {
+public class IsSecure extends AbstractNativeFunction {
 
-    public BValue[] execute(Context ctx) {
-        BDataTable dataTable = (BDataTable) getRefArgument(ctx, 0);
-        return getBValues(new BBoolean(dataTable.hasNext(ctx.isInTransaction())));
+    @Override
+    public BValue[] execute(Context context) {
+        BStruct wsConnection = (BStruct) getRefArgument(context, 0);
+        Session session = (Session) wsConnection.getNativeData(Constants.NATIVE_DATA_WEBSOCKET_SESSION);
+        boolean isSecuredConnection = session.isSecure();
+        return getBValues(new BBoolean(isSecuredConnection));
     }
 }

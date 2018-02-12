@@ -16,10 +16,11 @@
  *  under the License.
  */
 
-package org.ballerinalang.net.ws.nativeimpl;
+package org.ballerinalang.net.ws.nativeimpl.connection;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeKind;
+import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.model.values.BValue;
@@ -29,29 +30,32 @@ import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.natives.annotations.ReturnType;
 import org.ballerinalang.net.ws.Constants;
 
-import javax.websocket.Session;
+import java.util.Map;
 
 /**
- * Get the ID of the connection.
+ * Get all the upgrade headers.
  *
  * @since 0.94
  */
 
 @BallerinaFunction(
         packageName = "ballerina.net.ws",
-        functionName = "getID",
+        functionName = "getUpgradeHeaders",
         receiver = @Receiver(type = TypeKind.STRUCT, structType = "Connection",
                              structPackage = "ballerina.net.ws"),
-        returnType = {@ReturnType(type = TypeKind.STRING)},
+        returnType = {@ReturnType(type = TypeKind.MAP)},
         isPublic = true
 )
-public class GetID extends AbstractNativeFunction {
+public class GetUpgradeHeaders extends AbstractNativeFunction {
 
     @Override
     public BValue[] execute(Context context) {
         BStruct wsConnection = (BStruct) getRefArgument(context, 0);
-        Session session = (Session) wsConnection.getNativeData(Constants.NATIVE_DATA_WEBSOCKET_SESSION);
-        String id = session.getId();
-        return getBValues(new BString(id));
+        Map<String, String> upgradeHeaders =
+                (Map<String, String>) wsConnection.getNativeData(Constants.NATIVE_DATA_UPGRADE_HEADERS);
+        BMap<String, BString> bUpgradeHeaders = new BMap<>();
+        upgradeHeaders.entrySet().forEach(
+                upgradeHeader -> bUpgradeHeaders.put(upgradeHeader.getKey(), new BString(upgradeHeader.getValue())));
+        return getBValues(bUpgradeHeaders);
     }
 }

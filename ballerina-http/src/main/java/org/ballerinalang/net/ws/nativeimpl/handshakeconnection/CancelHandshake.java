@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.ballerinalang.net.ws.nativeimpl;
+package org.ballerinalang.net.ws.nativeimpl.handshakeconnection;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeKind;
@@ -27,38 +27,33 @@ import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.net.ws.Constants;
-import org.ballerinalang.util.exceptions.BallerinaException;
-
-import java.nio.ByteBuffer;
-import javax.websocket.Session;
+import org.wso2.transport.http.netty.contract.websocket.WebSocketInitMessage;
 
 /**
- * Push binary data to the other end of the connection.
+ * Get the ID of the connection.
  *
  * @since 0.94
  */
 
 @BallerinaFunction(
         packageName = "ballerina.net.ws",
-        functionName = "ping",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Connection",
+        functionName = "cancelHandshake",
+        receiver = @Receiver(type = TypeKind.STRUCT, structType = "HandshakeConnection",
                              structPackage = "ballerina.net.ws"),
-        args = {@Argument(name = "binaryData", type = TypeKind.BLOB),
-                @Argument(name = "timeoutInSecs", type = TypeKind.INT)},
+        args = {@Argument(name = "statusCode", type = TypeKind.INT),
+                @Argument(name = "reason", type = TypeKind.STRING)},
         isPublic = true
 )
-public class Ping extends AbstractNativeFunction {
+public class CancelHandshake extends AbstractNativeFunction {
 
     @Override
     public BValue[] execute(Context context) {
-        try {
-            BStruct wsConnection = (BStruct) getRefArgument(context, 0);
-            Session session = (Session) wsConnection.getNativeData(Constants.NATIVE_DATA_WEBSOCKET_SESSION);
-            byte[] binaryData = getBlobArgument(context, 0);
-            session.getBasicRemote().sendPing(ByteBuffer.wrap(binaryData));
-        } catch (Throwable e) {
-            throw new BallerinaException("Cannot send the message. Error occurred.");
-        }
+        BStruct handshakeConnection = (BStruct) getRefArgument(context, 0);
+        int statusCode = (int) getIntArgument(context, 0);
+        String reason = getStringArgument(context, 0);
+        WebSocketInitMessage initMessage =
+                (WebSocketInitMessage) handshakeConnection.getNativeData(Constants.WEBSOCKET_MESSAGE);
+        initMessage.cancelHandShake(statusCode, reason);
         return VOID_RETURN;
     }
 }
