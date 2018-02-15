@@ -21,7 +21,7 @@ package org.ballerinalang.net.ws;
 /**
  * Constants of WebSocket.
  */
-public class Constants extends org.ballerinalang.net.http.Constants {
+public class WebSocketConstants {
 
     // Common constants
     public static final String CONNECTOR_NAME = "WsClient";
@@ -67,4 +67,7 @@ public class Constants extends org.ballerinalang.net.http.Constants {
     public static final String NATIVE_DATA_UPGRADE_HEADERS = "NATIVE_DATA_UPGRADE_HEADERS";
     public static final String NATIVE_DATA_PARENT_CONNECTION_ID = "NATIVE_DATA_PARENT_CONNECTION_ID";
     public static final String NATIVE_DATA_PING_TIME_VALIDATOR = "NATIVE_DATA_PING_TIME_VALIDATOR";
+
+    public static final String NATIVE_DATA_QUERY_PARAMS = "NATIVE_DATA_QUERY_PARAMS";
+
 }

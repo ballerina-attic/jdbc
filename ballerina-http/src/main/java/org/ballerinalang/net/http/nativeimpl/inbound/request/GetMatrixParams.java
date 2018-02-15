@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -16,11 +16,10 @@
  *  under the License.
  */
 
-package org.ballerinalang.net.ws.nativeimpl;
+package org.ballerinalang.net.http.nativeimpl.inbound.request;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeKind;
-import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.AbstractNativeFunction;
@@ -28,34 +27,30 @@ import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.natives.annotations.ReturnType;
-import org.ballerinalang.net.ws.Constants;
-
-import java.util.Locale;
-import java.util.Map;
+import org.ballerinalang.net.http.HttpUtil;
+import org.ballerinalang.net.uri.URIUtil;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 /**
- * Get upgrade header for a given key.
+ * Get the Query params from HTTP message and return a map.
  *
- * @since 0.94
+ * @since 0.961.0
  */
-
 @BallerinaFunction(
-        packageName = "ballerina.net.ws",
-        functionName = "getUpgradeHeader",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Connection",
-                             structPackage = "ballerina.net.ws"),
-        args = {@Argument(name = "text", type = TypeKind.STRING)},
-        returnType = {@ReturnType(type = TypeKind.STRING)},
+        packageName = "ballerina.net.http",
+        functionName = "getMatrixParams",
+        receiver = @Receiver(type = TypeKind.STRUCT, structType = "InRequest",
+                             structPackage = "ballerina.net.http"),
+        args = {@Argument(name = "path", type = TypeKind.STRING)},
+        returnType = {@ReturnType(type = TypeKind.MAP, elementType = TypeKind.STRING)},
         isPublic = true
 )
-public class GetUpgradeHeader extends AbstractNativeFunction {
-
+public class GetMatrixParams extends AbstractNativeFunction {
     @Override
     public BValue[] execute(Context context) {
-        BStruct wsConnection = (BStruct) getRefArgument(context, 0);
-        String key = getStringArgument(context, 0).toLowerCase(Locale.ENGLISH);
-        Map<String, String> upgradeHeaders =
-                (Map<String, String>) wsConnection.getNativeData(Constants.NATIVE_DATA_UPGRADE_HEADERS);
-        return getBValues(new BString(upgradeHeaders.get(key)));
+        BStruct requestStruct  = ((BStruct) getRefArgument(context, 0));
+        String path = getStringArgument(context, 0);
+        HTTPCarbonMessage httpCarbonMessage = HttpUtil.getCarbonMsg(requestStruct, null);
+        return new BValue[]{URIUtil.getMatrixParamsMap(path, httpCarbonMessage)};
     }
 }

@@ -23,12 +23,14 @@ package org.ballerinalang.net.http;
  *
  * @since 0.8.0
  */
-public class Constants {
+public class HttpConstants {
 
     public static final String BASE_PATH = "BASE_PATH";
     public static final String SUB_PATH = "SUB_PATH";
     public static final String EXTRA_PATH_INFO = "EXTRA_PATH_INFO";
+    public static final String RAW_URI = "RAW_URI";
     public static final String RESOURCE_ARGS = "RESOURCE_ARGS";
+    public static final String MATRIX_PARAMS = "MATRIX_PARAMS";
     public static final String QUERY_STR = "QUERY_STR";
     public static final String RAW_QUERY_STR = "RAW_QUERY_STR";
 
@@ -96,11 +98,14 @@ public class Constants {
     public static final String ANN_CONFIG_ATTR_SSL_ENABLED_PROTOCOLS = "sslEnabledProtocols";
     public static final String ANN_CONFIG_ATTR_CIPHERS = "ciphers";
     public static final String ANN_CONFIG_ATTR_SSL_PROTOCOL = "sslProtocol";
-    public static final String ANN_CONFIG_ATTR_CERTIFICATE_REVOCATION_VERIFIER = "certificateRevocationVerifier";
+    public static final String ANN_CONFIG_ATTR_VALIDATE_CERTIFICATE_ENABLED = "validateCertificateEnabled";
     public static final String ANN_CONFIG_ATTR_CACHE_SIZE = "cacheSize";
-    public static final String ANN_CONFIG_ATTR_CACHE_DELAY = "cacheDelay";
+    public static final String ANN_CONFIG_ATTR_CACHE_VALIDITY_PERIOD = "cacheValidityPeriod";
     public static final String ANN_CONFIG_ATTR_WEBSOCKET = "webSocket";
     public static final String ANN_CONFIG_ATTR_TRANSFER_ENCODING = "transferEncoding";
+    public static final String ANN_CONFIG_ATTR_MAXIMUM_URL_LENGTH = "maxUriLength";
+    public static final String ANN_CONFIG_ATTR_MAXIMUM_HEADER_SIZE = "maxHeaderSize";
+    public static final String ANN_CONFIG_ATTR_MAXIMUM_ENTITY_BODY_SIZE = "maxEntityBodySize";
     public static final String ANN_CONFIG_ATTR_CHUNKING = "chunking";
     public static final String ANN_WEBSOCKET_ATTR_UPGRADE_PATH = "upgradePath";
     public static final String ANN_WEBSOCKET_ATTR_SERVICE_NAME = "serviceName";
@@ -183,9 +188,9 @@ public class Constants {
     public static final int SSL_ENABLED_PROTOCOLS_INDEX = 4;
     public static final int CIPHERS_INDEX = 5;
     public static final int SSL_PROTOCOL_INDEX = 6;
-    public static final int CERTIFICATE_REVOCATION_VERIFIER_INDEX = 0;
+    public static final int CERTIFICATE_VALIDATION_ENABLED_INDEX = 0;
     public static final int CACHE_SIZE_INDEX = 0;
-    public static final int CACHE_DELAY_INDEX = 1;
+    public static final int CACHE_VALIDITY_PERIOD_INDEX = 1;
 
     public static final int HTTP_MESSAGE_INDEX = 0;
     public static final int ENTITY_INDEX = 1;

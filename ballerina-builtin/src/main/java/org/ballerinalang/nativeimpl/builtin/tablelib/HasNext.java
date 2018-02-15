@@ -15,43 +15,34 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
-package org.ballerinalang.net.ws.nativeimpl;
+package org.ballerinalang.nativeimpl.builtin.tablelib;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BBoolean;
-import org.ballerinalang.model.values.BStruct;
+import org.ballerinalang.model.values.BTable;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.AbstractNativeFunction;
+import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
-import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.natives.annotations.ReturnType;
-import org.ballerinalang.net.ws.Constants;
-
-import javax.websocket.Session;
 
 /**
- * Check whether the connection is secure connection or not.
+ * Native function to check record availability in table.
  *
- * @since 0.94
+ * @since 0.8.0
  */
-
 @BallerinaFunction(
-        packageName = "ballerina.net.ws",
-        functionName = "isSecure",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Connection",
-                             structPackage = "ballerina.net.ws"),
+        packageName = "ballerina.builtin",
+        functionName = "table.hasNext",
+        args = {@Argument(name = "dt", type = TypeKind.TABLE)},
         returnType = {@ReturnType(type = TypeKind.BOOLEAN)},
         isPublic = true
 )
-public class IsSecure extends AbstractNativeFunction {
+public class HasNext extends AbstractNativeFunction {
 
-    @Override
-    public BValue[] execute(Context context) {
-        BStruct wsConnection = (BStruct) getRefArgument(context, 0);
-        Session session = (Session) wsConnection.getNativeData(Constants.NATIVE_DATA_WEBSOCKET_SESSION);
-        boolean isSecuredConnection = session.isSecure();
-        return getBValues(new BBoolean(isSecuredConnection));
+    public BValue[] execute(Context ctx) {
+        BTable table = (BTable) getRefArgument(ctx, 0);
+        return getBValues(new BBoolean(table.hasNext(ctx.isInTransaction())));
     }
 }
