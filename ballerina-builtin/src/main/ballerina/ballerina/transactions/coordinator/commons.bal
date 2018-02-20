@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ballerina.builtin.transactions.coordinator;
+package ballerina.transactions.coordinator;
 
 import ballerina.net.http;
 import ballerina.util;
@@ -23,10 +23,6 @@ import ballerina.log;
 const string TRANSACTION_CONTEXT_VERSION = "1.0";
 
 map transactions = {};
-
-enum TransactionState {
-    ACTIVE, PREPARED, COMMITTED, ABORTED
-}
 
 public struct Transaction {
     string transactionId;
@@ -111,7 +107,8 @@ public function respondToBadRequest (string msg) returns (http:OutResponse res) 
 function createTransaction (string coordinationType) returns (Transaction txn) {
     if (coordinationType == TWO_PHASE_COMMIT) {
         TwoPhaseCommitTransaction twopcTxn = {transactionId:util:uuid(), coordinationType:TWO_PHASE_COMMIT};
-        txn = (Transaction)twopcTxn;
+        var tx, _ = (Transaction)twopcTxn;
+        txn = tx;
     } else {
         error e = {msg:"Unknown coordination type: " + coordinationType};
         throw e;

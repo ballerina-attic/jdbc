@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ballerina.builtin.transactions.coordinator;
+package ballerina.transactions.coordinator;
 
 import ballerina.config;
 

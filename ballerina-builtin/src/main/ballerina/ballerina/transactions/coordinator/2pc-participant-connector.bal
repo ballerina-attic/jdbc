@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ballerina.builtin.transactions.coordinator;
+package ballerina.transactions.coordinator;
 
 import ballerina.net.http;
 
@@ -33,7 +33,7 @@ public connector ParticipantClient () {
         if (communicationErr == null) {
             var prepareRes, transformErr = <PrepareResponse>res.getJsonPayload();
             if (transformErr == null) {
-                int statusCode = res.getStatusCode();
+                int statusCode = res.statusCode;
                 string msg = prepareRes.message;
                 if (statusCode == 200) {
                     status = msg;
@@ -66,7 +66,7 @@ public connector ParticipantClient () {
         if (commErr == null) {
             var notifyRes, transformErr = <NotifyResponse>res.getJsonPayload();
             if (transformErr == null) {
-                int statusCode = res.getStatusCode();
+                int statusCode = res.statusCode;
                 string msg = notifyRes.message;
                 if (statusCode == 200) {
                     if (transformErr == null) {

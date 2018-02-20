@@ -14,10 +14,31 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ballerina.builtin.transactions.coordinator;
+package ballerina.transactions.coordinator;
 
 import ballerina.net.http;
 import ballerina.config;
+
+const string participantHost = getParticipantHost();
+const int participantPort = getParticipantPort();
+
+function getParticipantHost () returns (string host) {
+    host = config:getInstanceValue("http", "participant.host");
+    if (host == "") {
+        host = "localhost";
+    }
+    return;
+}
+
+function getParticipantPort () returns (int port) {
+    var p, e = <int>config:getInstanceValue("http", "participant.port");
+    if (e != null) {
+        port = 8081;
+    } else {
+        port = p;
+    }
+    return;
+}
 
 public connector CoordinatorClient () {
 
@@ -27,6 +48,8 @@ public connector CoordinatorClient () {
             create http:HttpClient(registerAtURL, {});
         }
         RegistrationRequest regReq = {transactionId:transactionId, participantId:participantId};
+
+        //TODO: set the proper host and port
         Protocol[] protocols = [{name:"volatile", url:"http://" + participantHost + ":" + participantPort + "/"}];
         regReq.participantProtocols = protocols;
 
@@ -35,7 +58,7 @@ public connector CoordinatorClient () {
         req.setJsonPayload(j);
         var res, e = coordinatorEP.post("", req);
         if (e == null) {
-            int statusCode = res.getStatusCode();
+            int statusCode = res.statusCode;
             if (statusCode == 200) {
                 jsonRes = res.getJsonPayload();
             } else {

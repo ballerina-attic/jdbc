@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ballerina.builtin.transactions.coordinator;
+package ballerina.transactions.coordinator;
 
 import ballerina.log;
 
@@ -264,7 +264,7 @@ function commitTransaction (string transactionId) returns (string message, error
         } else {
             e = err;
         }
-        transactions.remove(txnId);
+        transactions.remove(transactionId);
     }
     return;
 }
@@ -284,7 +284,7 @@ function abortTransaction (string transactionId) returns (string message, error 
         } else {
             e = err;
         }
-        transactions.remove(txnId);
+        transactions.remove(transactionId);
     }
     return;
 }
