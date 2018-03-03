@@ -85,7 +85,6 @@ public native function <ServerConnection conn> error (ServerError serverError) (
 public struct ConnectorError {
     string msg;
     error cause;
-    StackFrame[] stackTrace;
     int statusCode;
 }
 
@@ -98,6 +97,5 @@ public struct ConnectorError {
 public struct ServerError {
     string msg;
     error cause;
-    StackFrame[] stackTrace;
     int statusCode;
 }
