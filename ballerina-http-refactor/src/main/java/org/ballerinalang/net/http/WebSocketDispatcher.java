@@ -15,7 +15,7 @@
 *  specific language governing permissions and limitations
 *  under the License.
 */
-package org.ballerinalang.net.ws;
+package org.ballerinalang.net.http;
 
 import org.ballerinalang.connector.api.BallerinaConnectorException;
 import org.ballerinalang.connector.api.ConnectorFuture;
@@ -58,6 +58,14 @@ public class WebSocketDispatcher {
     public static WebSocketService findService(WebSocketServicesRegistry servicesRegistry,
                                                Map<String, String> variables, WebSocketMessage webSocketMessage,
                                                BMap<String, BString> queryParams) {
+        if (!webSocketMessage.isServerMessage()) {
+            String clientServiceName = webSocketMessage.getTarget();
+            WebSocketService clientService = servicesRegistry.getClientService(clientServiceName);
+            if (clientService == null) {
+                throw new BallerinaConnectorException("no client service found to handle the service request");
+            }
+            return clientService;
+        }
         try {
             String interfaceId = webSocketMessage.getListenerInterface();
             String serviceUri = webSocketMessage.getTarget();
@@ -83,7 +91,7 @@ public class WebSocketDispatcher {
         }
     }
 
-    public static void dispatchTextMessage(WsOpenConnectionInfo connectionInfo, WebSocketTextMessage textMessage) {
+    public static void dispatchTextMessage(WebSocketOpenConnectionInfo connectionInfo, WebSocketTextMessage textMessage) {
         WebSocketService wsService = connectionInfo.getService();
         Resource onTextMessageResource = wsService.getResourceByName(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE);
         if (onTextMessageResource == null) {
@@ -106,7 +114,7 @@ public class WebSocketDispatcher {
         future.setConnectorFutureListener(new WebSocketEmptyConnFutureListener());
     }
 
-    public static void dispatchBinaryMessage(WsOpenConnectionInfo connectionInfo,
+    public static void dispatchBinaryMessage(WebSocketOpenConnectionInfo connectionInfo,
                                              WebSocketBinaryMessage binaryMessage) {
         WebSocketService wsService = connectionInfo.getService();
         Resource onBinaryMessageResource = wsService.getResourceByName(
@@ -132,7 +140,7 @@ public class WebSocketDispatcher {
         future.setConnectorFutureListener(new WebSocketEmptyConnFutureListener());
     }
 
-    public static void dispatchControlMessage(WsOpenConnectionInfo connectionInfo,
+    public static void dispatchControlMessage(WebSocketOpenConnectionInfo connectionInfo,
                                               WebSocketControlMessage controlMessage) {
         if (controlMessage.getControlSignal() == WebSocketControlSignal.PING) {
             WebSocketDispatcher.dispatchPingMessage(connectionInfo, controlMessage);
@@ -143,7 +151,7 @@ public class WebSocketDispatcher {
         }
     }
 
-    private static void dispatchPingMessage(WsOpenConnectionInfo connectionInfo,
+    private static void dispatchPingMessage(WebSocketOpenConnectionInfo connectionInfo,
                                             WebSocketControlMessage controlMessage) {
         WebSocketService wsService = connectionInfo.getService();
         Resource onPingMessageResource = wsService.getResourceByName(WebSocketConstants.RESOURCE_NAME_ON_PING);
@@ -164,7 +172,7 @@ public class WebSocketDispatcher {
         future.setConnectorFutureListener(new WebSocketEmptyConnFutureListener());
     }
 
-    private static void dispatchPongMessage(WsOpenConnectionInfo connectionInfo,
+    private static void dispatchPongMessage(WebSocketOpenConnectionInfo connectionInfo,
                                             WebSocketControlMessage controlMessage) {
         WebSocketService wsService = connectionInfo.getService();
         Resource onPongMessageResource = wsService.getResourceByName(WebSocketConstants.RESOURCE_NAME_ON_PONG);
@@ -184,7 +192,7 @@ public class WebSocketDispatcher {
         future.setConnectorFutureListener(new WebSocketEmptyConnFutureListener());
     }
 
-    public static void dispatchCloseMessage(WsOpenConnectionInfo connectionInfo, WebSocketCloseMessage closeMessage) {
+    public static void dispatchCloseMessage(WebSocketOpenConnectionInfo connectionInfo, WebSocketCloseMessage closeMessage) {
         WebSocketService wsService = connectionInfo.getService();
         Resource onCloseResource = wsService.getResourceByName(WebSocketConstants.RESOURCE_NAME_ON_CLOSE);
         if (onCloseResource == null) {
@@ -203,7 +211,7 @@ public class WebSocketDispatcher {
         future.setConnectorFutureListener(new WebSocketEmptyConnFutureListener());
     }
 
-    public static void dispatchIdleTimeout(WsOpenConnectionInfo connectionInfo,
+    public static void dispatchIdleTimeout(WebSocketOpenConnectionInfo connectionInfo,
                                            WebSocketControlMessage controlMessage) {
         WebSocketService wsService = connectionInfo.getService();
         Resource onIdleTimeoutResource = wsService.getResourceByName(WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT);
