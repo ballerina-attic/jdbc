@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.net.http.nativeimpl.inbound.request;
+package org.ballerinalang.net.http.nativeimpl.request;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeKind;

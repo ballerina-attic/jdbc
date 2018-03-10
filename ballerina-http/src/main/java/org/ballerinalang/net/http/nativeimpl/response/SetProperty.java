@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.net.http.nativeimpl.inbound.response;
+package org.ballerinalang.net.http.nativeimpl.response;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeKind;

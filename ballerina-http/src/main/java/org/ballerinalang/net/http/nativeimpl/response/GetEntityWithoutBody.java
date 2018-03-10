@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.net.http.nativeimpl.outbound.response;
+package org.ballerinalang.net.http.nativeimpl.response;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeKind;
@@ -28,7 +28,7 @@ import org.ballerinalang.natives.annotations.ReturnType;
 import org.ballerinalang.net.http.HttpUtil;
 
 /**
- * Get the entity without the body of outbound response.
+ * Get the entity without the body of inbound response.
  *
  * @since 0.96
  */

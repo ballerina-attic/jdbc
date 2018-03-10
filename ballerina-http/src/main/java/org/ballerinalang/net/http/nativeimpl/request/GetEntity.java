@@ -16,34 +16,32 @@
  * under the License.
  */
 
-package org.ballerinalang.net.http.nativeimpl.inbound.response;
+package org.ballerinalang.net.http.nativeimpl.request;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.AbstractNativeFunction;
-import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
+import org.ballerinalang.natives.annotations.ReturnType;
 import org.ballerinalang.net.http.HttpUtil;
 
 /**
- * Set the entity of the inbound response.
+ * Get the 'Entity' of the inbound request with the body.
  *
- * @since 0.96
+ * @since 0.96.0
  */
-@BallerinaFunction(
-        packageName = "ballerina.net.http",
-        functionName = "setEntity",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Response",
-                             structPackage = "ballerina.net.http"),
-        args = {@Argument(name = "entity", type = TypeKind.STRUCT)},
-        isPublic = true
-)
-public class SetEntity extends AbstractNativeFunction {
-
+@BallerinaFunction(packageName = "ballerina.net.http",
+                   functionName = "getEntity",
+                   receiver = @Receiver(type = TypeKind.STRUCT,
+                                        structType = "Request",
+                                        structPackage = "ballerina.net.http"),
+                   returnType = { @ReturnType(type = TypeKind.STRUCT) },
+                   isPublic = true)
+public class GetEntity extends AbstractNativeFunction {
     @Override
     public BValue[] execute(Context context) {
-        return HttpUtil.setEntity(context, this, false);
+        return getBValues(HttpUtil.getEntity(context, this, true, true));
     }
 }

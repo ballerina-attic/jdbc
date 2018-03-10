@@ -15,7 +15,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.net.http.nativeimpl.outbound.request;
+
+package org.ballerinalang.net.http.nativeimpl.request;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeKind;
@@ -24,25 +25,25 @@ import org.ballerinalang.natives.AbstractNativeFunction;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.natives.annotations.ReturnType;
 import org.ballerinalang.net.http.HttpUtil;
 
 /**
- * Ballerina function to get a message property.
+ * Set the entity of the inbound request.
+ *
+ * @since 0.96.0
  */
 @BallerinaFunction(
         packageName = "ballerina.net.http",
-        functionName = "getProperty",
+        functionName = "setEntity",
         receiver = @Receiver(type = TypeKind.STRUCT, structType = "Request",
                              structPackage = "ballerina.net.http"),
-        args = {@Argument(name = "propertyName", type = TypeKind.STRING)},
-        returnType = {@ReturnType(type = TypeKind.STRING)}, // TODO: Ballerina only supports string properties ATM
+        args = {@Argument(name = "entity", type = TypeKind.STRUCT)},
         isPublic = true
 )
-public class GetProperty extends AbstractNativeFunction {
+public class SetEntity extends AbstractNativeFunction {
 
     @Override
     public BValue[] execute(Context context) {
-        return HttpUtil.getProperty(context, this, true);
+        return HttpUtil.setEntity(context, this, true);
     }
 }
