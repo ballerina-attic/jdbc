@@ -16,24 +16,26 @@
  * under the License.
  */
 
-package org.ballerinalang.net.ws;
+package org.ballerinalang.net.http;
 
 import org.ballerinalang.bre.Context;
-import org.ballerinalang.model.values.BMap;
+import org.ballerinalang.bre.bvm.CallableUnitCallback;
 import org.ballerinalang.model.values.BStruct;
-import org.ballerinalang.model.values.BValue;
 
 /**
- * Utility class for websockets.
+ * {@code DataContext} is the wrapper to hold {@code Context} and {@code CallableUnitCallback}.
  */
-public abstract class WebSocketUtil {
+public class DataContext {
+    public Context context;
+    public CallableUnitCallback callback;
 
-    public static BValue[] getQueryParams(Context context) {
-        BStruct wsConnection = (BStruct) context.getRefArgument(0);
-        Object queryParams = wsConnection.getNativeData(WebSocketConstants.NATIVE_DATA_QUERY_PARAMS);
-        if (queryParams != null && queryParams instanceof BMap) {
-            return new BValue[] { (BMap) wsConnection.getNativeData(WebSocketConstants.NATIVE_DATA_QUERY_PARAMS) };
-        }
-        return new BValue[] { new BMap<>() };
+    public DataContext(Context context, CallableUnitCallback callback) {
+        this.context = context;
+        this.callback = callback;
+    }
+
+    public void notifyReply(BStruct response, BStruct httpConnectorError) {
+        context.setReturnValues(response, httpConnectorError);
+        callback.notifySuccess();
     }
 }
