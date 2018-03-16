@@ -1,4 +1,4 @@
-// Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -16,19 +16,12 @@
 
 package ballerina.builtin;
 
-deprecated {}
-public annotation Description docData;
+@Description {value:"Publish a struct to the stream"}
+@Param {value:"s: The stream to which publishing is to be done"}
+@Param {value:"data: The struct with data, to be published"}
+public native function <stream s> publish (any data);
 
-deprecated {}
-struct docData {
-    string value;
-}
-
-deprecated {}
-public annotation<resource, function> Param docData;
-
-deprecated {}
-public annotation<function> Return docData;
-
-deprecated {}
-public annotation<annotation, enum, struct> Field docData;
+@Description {value:"Subscribe to structs from a stream"}
+@Param {value:"s: The stream to which subscription is to be done"}
+@Param {value:"func: The function pointer for subscription"}
+public native function <stream s> subscribe (function (any) func);

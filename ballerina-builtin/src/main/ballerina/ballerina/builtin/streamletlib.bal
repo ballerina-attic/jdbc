@@ -1,4 +1,4 @@
-// Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -16,19 +16,6 @@
 
 package ballerina.builtin;
 
-deprecated {}
-public annotation Description docData;
-
-deprecated {}
-struct docData {
-    string value;
-}
-
-deprecated {}
-public annotation<resource, function> Param docData;
-
-deprecated {}
-public annotation<function> Return docData;
-
-deprecated {}
-public annotation<annotation, enum, struct> Field docData;
+@Description {value:"Stops the streamlet runtime"}
+@Param {value:"s: The streamlet runtime which needs to be stop"}
+public native function <streamlet s> stop ();
