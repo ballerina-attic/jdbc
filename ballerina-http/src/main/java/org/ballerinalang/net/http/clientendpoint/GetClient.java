@@ -16,40 +16,39 @@
  *  under the License.
  */
 
-package org.ballerinalang.net.http.websocketclientendpoint;
+package org.ballerinalang.net.http.clientendpoint;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
-import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
-import org.ballerinalang.connector.api.Struct;
 import org.ballerinalang.model.types.TypeKind;
-import org.ballerinalang.model.values.BValue;
+import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.natives.annotations.ReturnType;
-import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.WebSocketConstants;
+
+import static org.ballerinalang.net.http.HttpConstants.B_CONNECTOR;
+import static org.ballerinalang.net.http.HttpConstants.CLIENT_ENDPOINT_INDEX;
 
 /**
- * Get the ID of the connection.
+ * Get the client endpoint.
  *
  * @since 0.966
  */
 
 @BallerinaFunction(
         packageName = "ballerina.net.http",
-        functionName = "getConnector",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "WebSocketClient",
-                             structPackage = "ballerina.net.http"),
-        returnType = {@ReturnType(type = TypeKind.CONNECTOR)},
+        functionName = "getClient",
+        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Client",
+                structPackage = "ballerina.net.http"),
+        returnType = {@ReturnType(type = TypeKind.STRUCT)},
         isPublic = true
 )
-public class GetConnector extends BlockingNativeCallableUnit {
+public class GetClient extends BlockingNativeCallableUnit {
 
     @Override
     public void execute(Context context) {
-        Struct clientEndpoint = BLangConnectorSPIUtil.getConnectorEndpointStruct(context);
-        Struct clientEndpointConfig = clientEndpoint.getStructField(HttpConstants.CLIENT_ENDPOINT_CONFIG);
-        context.setReturnValues((BValue) clientEndpointConfig.getNativeData(WebSocketConstants.WEBSOCKET_CONNECTOR));
+        BStruct clientEndPoint = (BStruct) context.getRefArgument(CLIENT_ENDPOINT_INDEX);
+        BStruct clientConnector = (BStruct) clientEndPoint.getNativeData(B_CONNECTOR);
+        context.setReturnValues(clientConnector);
     }
 }

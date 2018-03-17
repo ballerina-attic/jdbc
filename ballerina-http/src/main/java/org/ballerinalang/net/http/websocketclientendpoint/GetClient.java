@@ -16,49 +16,40 @@
  *  under the License.
  */
 
-package org.ballerinalang.net.http.clientendpoint;
+package org.ballerinalang.net.http.websocketclientendpoint;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
+import org.ballerinalang.connector.api.Struct;
 import org.ballerinalang.model.types.TypeKind;
-import org.ballerinalang.model.values.BConnector;
-import org.ballerinalang.model.values.BStruct;
+import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.natives.annotations.ReturnType;
 import org.ballerinalang.net.http.HttpConstants;
-
-import static org.ballerinalang.net.http.HttpConstants.CLIENT_CONNECTOR;
-import static org.ballerinalang.net.http.HttpConstants.CLIENT_ENDPOINT_CONFIG_INDEX;
-import static org.ballerinalang.net.http.HttpConstants.CLIENT_ENDPOINT_INDEX;
-import static org.ballerinalang.net.http.HttpConstants.HTTP_PACKAGE_PATH;
-import static org.ballerinalang.net.http.HttpConstants.SERVICE_URL_INDEX;
+import org.ballerinalang.net.http.WebSocketConstants;
 
 /**
- * Get the client endpoint.
+ * Get the ID of the connection.
  *
  * @since 0.966
  */
 
 @BallerinaFunction(
         packageName = "ballerina.net.http",
-        functionName = "getConnector",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Client",
+        functionName = "getClient",
+        receiver = @Receiver(type = TypeKind.STRUCT, structType = "WebSocketClient",
                              structPackage = "ballerina.net.http"),
         returnType = {@ReturnType(type = TypeKind.CONNECTOR)},
         isPublic = true
 )
-public class GetConnector extends BlockingNativeCallableUnit {
+public class GetClient extends BlockingNativeCallableUnit {
 
     @Override
     public void execute(Context context) {
-        BStruct clientEndPoint = (BStruct) context.getRefArgument(CLIENT_ENDPOINT_INDEX);
-        BStruct clientEndpointConfig = (BStruct) clientEndPoint.getRefField(CLIENT_ENDPOINT_CONFIG_INDEX);
-        BConnector clientConnector = BLangConnectorSPIUtil.createBConnector(context.getProgramFile(), HTTP_PACKAGE_PATH,
-                CLIENT_CONNECTOR, clientEndpointConfig.getStringField(SERVICE_URL_INDEX), clientEndpointConfig);
-        clientConnector.setNativeData(HttpConstants.CLIENT_CONNECTOR, clientEndPoint
-                .getNativeData(HttpConstants.CLIENT_CONNECTOR));
-        context.setReturnValues(clientConnector);
+        Struct clientEndpoint = BLangConnectorSPIUtil.getConnectorEndpointStruct(context);
+        Struct clientEndpointConfig = clientEndpoint.getStructField(HttpConstants.CLIENT_ENDPOINT_CONFIG);
+        context.setReturnValues((BValue) clientEndpointConfig.getNativeData(WebSocketConstants.WEBSOCKET_CONNECTOR));
     }
 }
