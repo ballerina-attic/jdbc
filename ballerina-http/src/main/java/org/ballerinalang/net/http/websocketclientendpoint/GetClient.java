@@ -38,13 +38,13 @@ import org.ballerinalang.net.http.WebSocketConstants;
 
 @BallerinaFunction(
         packageName = "ballerina.net.http",
-        functionName = "getConnector",
+        functionName = "getClient",
         receiver = @Receiver(type = TypeKind.STRUCT, structType = "WebSocketClient",
                              structPackage = "ballerina.net.http"),
-        returnType = {@ReturnType(type = TypeKind.CONNECTOR)},
+        returnType = {@ReturnType(type = TypeKind.STRUCT)},
         isPublic = true
 )
-public class GetConnector extends BlockingNativeCallableUnit {
+public class GetClient extends BlockingNativeCallableUnit {
 
     @Override
     public void execute(Context context) {
