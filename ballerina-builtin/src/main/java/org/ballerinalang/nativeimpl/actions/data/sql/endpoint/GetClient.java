@@ -16,33 +16,36 @@
  *  under the License.
  */
 
-package org.ballerinalang.net.http.serviceendpoint;
+package org.ballerinalang.nativeimpl.actions.data.sql.endpoint;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
+import org.ballerinalang.model.values.BStruct;
+import org.ballerinalang.nativeimpl.actions.data.sql.Constants;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.natives.annotations.ReturnType;
 
 /**
- * Get the ID of the connection.
+ * Returns the SQL Client connector.
  *
- * @since 0.966
+ * @since 0.965
  */
 
-@BallerinaFunction(
-        packageName = "ballerina.net.http",
-        functionName = "getConnector",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Service",
-                             structPackage = "ballerina.net.http"),
-        returnType = {@ReturnType(type = TypeKind.CONNECTOR)},
-        isPublic = true
-)
-public class GetConnector extends BlockingNativeCallableUnit {
+@BallerinaFunction(packageName = "ballerina.data.sql",
+                   functionName = "getClient",
+                   receiver = @Receiver(type = TypeKind.STRUCT,
+                                        structType = "Client",
+                                        structPackage = "ballerina.data.sql"),
+                   returnType = { @ReturnType(type = TypeKind.STRUCT) },
+                   isPublic = true)
+public class GetClient extends BlockingNativeCallableUnit {
 
     @Override
     public void execute(Context context) {
-        context.setReturnValues();
+        BStruct clientEndPoint = (BStruct) context.getRefArgument(0);
+        BStruct clientConnector = (BStruct) clientEndPoint.getNativeData(Constants.B_CONNECTOR);
+        context.setReturnValues(clientConnector);
     }
 }
