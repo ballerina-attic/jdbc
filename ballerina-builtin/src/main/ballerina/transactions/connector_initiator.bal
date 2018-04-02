@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ballerina.transactions.coordinator;
+package ballerina.transactions;
 
 import ballerina/http;
 
@@ -32,7 +32,7 @@ struct InitiatorClientEP {
 }
 
 function <InitiatorClientEP ep> init (InitiatorClientConfig conf) {
-    endpoint http:ClientEndpoint httpEP {targets:[{uri:conf.registerAtURL}],
+    endpoint http:ClientEndpoint httpEP {targets:[{url:conf.registerAtURL}],
         endpointTimeout:conf.endpointTimeout,
         retry:{count:conf.retryConfig.count,
                   interval:conf.retryConfig.interval}};
@@ -60,7 +60,7 @@ function <InitiatorClient client> register (string transactionId,
     req.setJsonPayload(reqPayload);
     http:Response res =? httpClient -> post("", req);
     int statusCode = res.statusCode;
-    if (statusCode != 200) {
+    if (statusCode != http:OK_200) {
         error err = {message:"Registration for transaction: " + transactionId + " failed"};
         return err;
     }
