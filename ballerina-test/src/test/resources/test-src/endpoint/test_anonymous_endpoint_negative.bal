@@ -59,10 +59,7 @@ function test1 () returns (string) {
     return exFlow;
 }
 
-endpoint DummyEndpoint ep { conf1 : "test1"};
-
-
-service<DummyServiceType> foo bind ep {
+service<DummyServiceType> foo bind  { confX : "test1"} {
     getAction (endpoint client, string x, float y){
         client -> invoke1("t", 1);
     }
