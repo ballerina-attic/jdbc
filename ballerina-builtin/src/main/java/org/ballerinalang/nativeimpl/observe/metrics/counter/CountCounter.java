@@ -17,7 +17,7 @@
  *  under the License.
  * /
  */
-package org.ballerinalang.observe.metrics.counter;
+package org.ballerinalang.nativeimpl.observe.metrics.counter;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
@@ -39,12 +39,12 @@ import java.util.List;
  * Return the value of the counter.
  */
 @BallerinaFunction(
-        orgName = "ballerina", packageName = "metrics",
+        orgName = "ballerina", packageName = "observe",
         functionName = "count",
         receiver = @Receiver(type = TypeKind.STRUCT, structType = "Counter",
-                structPackage = "ballerina.metrics"),
+                structPackage = "ballerina.observe"),
         args = {@Argument(name = "counter", type = TypeKind.STRUCT, structType = "Counter",
-                structPackage = "ballerina.metrics")},
+                structPackage = "ballerina.observe")},
         returnType = {@ReturnType(type = TypeKind.FLOAT)},
         isPublic = true
 )

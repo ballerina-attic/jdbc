@@ -15,12 +15,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.observe.metrics.summary;
+package org.ballerinalang.nativeimpl.observe.metrics.summary;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
-import org.ballerinalang.model.values.BFloat;
+import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.natives.annotations.Argument;
@@ -34,25 +34,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Returns the value at a specific percentile.
+ * Returns the number of times that record has been called since this summary was created.
  */
 @BallerinaFunction(
-        orgName = "ballerina", packageName = "metrics",
-        functionName = "percentile",
+        orgName = "ballerina", packageName = "observe",
+        functionName = "count",
         receiver = @Receiver(type = TypeKind.STRUCT, structType = "Summary",
-                structPackage = "ballerina.metrics"),
+                structPackage = "ballerina.observe"),
         args = {@Argument(name = "summary", type = TypeKind.STRUCT, structType = "Summary",
-                structPackage = "ballerina.metrics"), @Argument(name = "percentile", type = TypeKind.FLOAT)},
-        returnType = {@ReturnType(type = TypeKind.FLOAT)},
+                structPackage = "ballerina.observe")},
+        returnType = {@ReturnType(type = TypeKind.INT)},
         isPublic = true
 )
-public class PercentileSummary extends BlockingNativeCallableUnit {
+public class CountSummary extends BlockingNativeCallableUnit {
     @Override
     public void execute(Context context) {
         BStruct summaryStruct = (BStruct) context.getRefArgument(0);
         String name = summaryStruct.getStringField(0);
         String description = summaryStruct.getStringField(1);
-        float percentile = (float) context.getFloatArgument(0);
         BMap tagsMap = (BMap) summaryStruct.getRefField(0);
 
         if (!tagsMap.isEmpty()) {
@@ -60,12 +59,11 @@ public class PercentileSummary extends BlockingNativeCallableUnit {
             for (Object key : tagsMap.keySet()) {
                 tags.add(new Tag(key.toString(), tagsMap.get(key).stringValue()));
             }
-            context.setReturnValues(new BFloat(Summary.builder(name).description(description).tags(tags).register()
-                    .percentile(percentile)));
+            context.setReturnValues(new BInteger(Summary.builder(name).description(description).tags(tags).register()
+                    .count()));
 
         } else {
-            context.setReturnValues(new BFloat(Summary.builder(name).description(description).register()
-                    .percentile(percentile)));
+            context.setReturnValues(new BInteger(Summary.builder(name).description(description).register().count()));
         }
     }
 }

@@ -17,52 +17,55 @@
  *  under the License.
  * /
  */
-package org.ballerinalang.observe.metrics.counter;
+package org.ballerinalang.nativeimpl.observe.metrics.gauge;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
+import org.ballerinalang.model.values.BFloat;
 import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.util.metrics.Counter;
+import org.ballerinalang.natives.annotations.ReturnType;
+import org.ballerinalang.util.metrics.Gauge;
 import org.ballerinalang.util.metrics.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Increment the counter by the given amount.
+ * Return the value of the gauge.
  */
 @BallerinaFunction(
-        orgName = "ballerina", packageName = "metrics",
-        functionName = "increment",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Counter",
-                structPackage = "ballerina.metrics"),
-        args = {@Argument(name = "counter", type = TypeKind.STRUCT, structType = "Counter",
-                structPackage = "ballerina.metrics"), @Argument(name = "amount", type = TypeKind.FLOAT)},
+        orgName = "ballerina", packageName = "observe",
+        functionName = "value",
+        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Gauge",
+                structPackage = "ballerina.observe"),
+        args = {@Argument(name = "gauge", type = TypeKind.STRUCT, structType = "Gauge",
+                structPackage = "ballerina.observe")},
+        returnType = {@ReturnType(type = TypeKind.FLOAT)},
         isPublic = true
 )
-public class IncrementCounter extends BlockingNativeCallableUnit {
-
+public class GetGauge extends BlockingNativeCallableUnit {
     @Override
     public void execute(Context context) {
-        BStruct counterStruct = (BStruct) context.getRefArgument(0);
-        String name = counterStruct.getStringField(0);
-        String description = counterStruct.getStringField(1);
-        BMap tagsMap = (BMap) counterStruct.getRefField(0);
-        float amount = (float) context.getFloatArgument(0);
+        BStruct gaugeStruct = (BStruct) context.getRefArgument(0);
+        String name = gaugeStruct.getStringField(0);
+        String description = gaugeStruct.getStringField(1);
+        BMap tagsMap = (BMap) gaugeStruct.getRefField(0);
 
         if (!tagsMap.isEmpty()) {
             List<Tag> tags = new ArrayList<>();
             for (Object key : tagsMap.keySet()) {
                 tags.add(new Tag(key.toString(), tagsMap.get(key).stringValue()));
             }
-            Counter.builder(name).description(description).tags(tags).register().increment(amount);
+            context.setReturnValues(new BFloat(Gauge.builder(name).description(description).tags(tags).register()
+                    .get()));
+
         } else {
-            Counter.builder(name).description(description).register().increment(amount);
+            context.setReturnValues(new BFloat(Gauge.builder(name).description(description).register().get()));
         }
     }
 }

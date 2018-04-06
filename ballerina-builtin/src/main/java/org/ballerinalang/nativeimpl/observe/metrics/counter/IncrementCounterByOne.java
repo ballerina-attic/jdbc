@@ -17,7 +17,7 @@
  *  under the License.
  * /
  */
-package org.ballerinalang.observe.metrics.gauge;
+package org.ballerinalang.nativeimpl.observe.metrics.counter;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
@@ -27,40 +27,42 @@ import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.util.metrics.Gauge;
+import org.ballerinalang.util.metrics.Counter;
 import org.ballerinalang.util.metrics.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Increment the gauge by one.
+ * Increment the counter by one.
  */
+
 @BallerinaFunction(
-        orgName = "ballerina", packageName = "metrics",
+        orgName = "ballerina", packageName = "observe",
         functionName = "incrementByOne",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Gauge",
-                structPackage = "ballerina.metrics"),
-        args = {@Argument(name = "gauge", type = TypeKind.STRUCT, structType = "Gauge",
-                structPackage = "ballerina.metrics")},
+        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Counter",
+                structPackage = "ballerina.observe"),
+        args = {@Argument(name = "counter", type = TypeKind.STRUCT, structType = "Counter",
+                structPackage = "ballerina.observe")},
         isPublic = true
 )
-public class IncrementGaugeByOne extends BlockingNativeCallableUnit {
+public class IncrementCounterByOne extends BlockingNativeCallableUnit {
+
     @Override
     public void execute(Context context) {
-        BStruct gaugeStruct = (BStruct) context.getRefArgument(0);
-        String name = gaugeStruct.getStringField(0);
-        String description = gaugeStruct.getStringField(1);
-        BMap tagsMap = (BMap) gaugeStruct.getRefField(0);
+        BStruct counterStruct = (BStruct) context.getRefArgument(0);
+        String name = counterStruct.getStringField(0);
+        String description = counterStruct.getStringField(1);
+        BMap tagsMap = (BMap) counterStruct.getRefField(0);
 
         if (!tagsMap.isEmpty()) {
             List<Tag> tags = new ArrayList<>();
             for (Object key : tagsMap.keySet()) {
                 tags.add(new Tag(key.toString(), tagsMap.get(key).stringValue()));
             }
-            Gauge.builder(name).description(description).tags(tags).register().increment();
+            Counter.builder(name).description(description).tags(tags).register().increment();
         } else {
-            Gauge.builder(name).description(description).register().increment();
+            Counter.builder(name).description(description).register().increment();
         }
     }
 }

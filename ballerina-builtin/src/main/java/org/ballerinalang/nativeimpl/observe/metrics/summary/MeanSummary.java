@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.observe.metrics.summary;
+package org.ballerinalang.nativeimpl.observe.metrics.summary;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
@@ -34,19 +34,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Returns the maximum value of a single event.
+ * Returns the distribution average for all recorded events.
  */
 @BallerinaFunction(
-        orgName = "ballerina", packageName = "metrics",
-        functionName = "max",
+        orgName = "ballerina", packageName = "observe",
+        functionName = "mean",
         receiver = @Receiver(type = TypeKind.STRUCT, structType = "Summary",
-                structPackage = "ballerina.metrics"),
+                structPackage = "ballerina.observe"),
         args = {@Argument(name = "summary", type = TypeKind.STRUCT, structType = "Summary",
-                structPackage = "ballerina.metrics")},
+                structPackage = "ballerina.observe")},
         returnType = {@ReturnType(type = TypeKind.FLOAT)},
         isPublic = true
 )
-public class MaxSummary extends BlockingNativeCallableUnit {
+public class MeanSummary extends BlockingNativeCallableUnit {
     @Override
     public void execute(Context context) {
         BStruct summaryStruct = (BStruct) context.getRefArgument(0);
@@ -60,10 +60,10 @@ public class MaxSummary extends BlockingNativeCallableUnit {
                 tags.add(new Tag(key.toString(), tagsMap.get(key).stringValue()));
             }
             context.setReturnValues(new BFloat(Summary.builder(name).description(description).tags(tags).register()
-                    .max()));
+                    .mean()));
 
         } else {
-            context.setReturnValues(new BFloat(Summary.builder(name).description(description).register().max()));
+            context.setReturnValues(new BFloat(Summary.builder(name).description(description).register().mean()));
         }
     }
 }
