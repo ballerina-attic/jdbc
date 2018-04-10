@@ -30,6 +30,7 @@ import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.net.jms.AbstractBlockinAction;
 import org.ballerinalang.net.jms.Constants;
 import org.ballerinalang.net.jms.JMSUtils;
+import org.ballerinalang.net.jms.nativeimpl.endpoint.common.SessionConnector;
 import org.ballerinalang.net.jms.utils.BallerinaAdapter;
 import org.ballerinalang.util.exceptions.BallerinaException;
 
@@ -46,24 +47,18 @@ import javax.jms.Topic;
 @BallerinaFunction(
         orgName = "ballerina",
         packageName = "jms",
-        functionName = "initTopicProducer",
-        receiver = @Receiver(type = TypeKind.STRUCT,
-                             structType = "TopicProducer",
-                             structPackage = "ballerina.jms"),
-        args = {
-                @Argument(name = "session",
-                          type = TypeKind.STRUCT,
-                          structType = "Session")
-        },
+        functionName = "initTopicPublisher",
+        receiver = @Receiver(type = TypeKind.STRUCT, structType = "TopicPublisher", structPackage = "ballerina.jms"),
+        args = { @Argument(name = "session", type = TypeKind.STRUCT, structType = "Session") },
         isPublic = true
 )
-public class InitTopicProducer extends AbstractBlockinAction {
+public class InitTopicPublisher extends AbstractBlockinAction {
 
     @Override
     public void execute(Context context, CallableUnitCallback callback) {
-        Struct topicProducerBObject = BallerinaAdapter.getReceiverStruct(context);
-        Struct topicProducerConfig = topicProducerBObject.getStructField(Constants.TOPIC_PRODUCER_FIELD_CONFIG);
-        String topicPattern = topicProducerConfig.getStringField(Constants.TOPIC_PRODUCER_FIELD_TOPIC_PATTERN);
+        Struct topicProducerBObject = BallerinaAdapter.getReceiverObject(context);
+        Struct topicProducerConfig = topicProducerBObject.getStructField(Constants.TOPIC_PUBLISHER_FIELD_CONFIG);
+        String topicPattern = topicProducerConfig.getStringField(Constants.TOPIC_PUBLISHER_FIELD_TOPIC_PATTERN);
 
         if (JMSUtils.isNullOrEmptyAfterTrim(topicPattern)) {
             throw new BallerinaException("Topic pattern cannot be null", context);
@@ -75,13 +70,19 @@ public class InitTopicProducer extends AbstractBlockinAction {
                                                            Session.class,
                                                            context);
         try {
-            Topic topic = JMSUtils.getTopic(session, topicPattern);
+
+            Topic topic = null;
+            if (!JMSUtils.isNullOrEmptyAfterTrim(topicPattern)) {
+                topic = JMSUtils.getTopic(session, topicPattern);
+            }
             MessageProducer producer = session.createProducer(topic);
             Struct topicProducerConnectorBObject
-                    = topicProducerBObject.getStructField(Constants.TOPIC_PRODUCER_FIELD_CONNECTOR);
-            topicProducerConnectorBObject.addNativeData(Constants.JMS_TOPIC_PRODUCER_OBJECT, producer);
+                    = topicProducerBObject.getStructField(Constants.TOPIC_PUBLISHER_FIELD_CONNECTOR);
+            topicProducerConnectorBObject.addNativeData(Constants.JMS_PRODUCER_OBJECT, producer);
+            topicProducerConnectorBObject.addNativeData(Constants.SESSION_CONNECTOR_OBJECT,
+                                                        new SessionConnector(session));
         } catch (JMSException e) {
-            throw new BallerinaException("Error creating topic producer", e, context);
+            BallerinaAdapter.throwBallerinaException("Error creating topic producer", context, e);
         }
 
     }

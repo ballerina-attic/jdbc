@@ -6,7 +6,7 @@
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -14,37 +14,41 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
 
-package org.ballerinalang.net.http.nativeimpl.connection;
+package org.ballerinalang.net.jms.nativeimpl.endpoint.queue.receiver;
 
 import org.ballerinalang.bre.Context;
+import org.ballerinalang.bre.bvm.CallableUnitCallback;
+import org.ballerinalang.model.NativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
-import org.ballerinalang.natives.annotations.ReturnType;
+import org.ballerinalang.net.jms.nativeimpl.endpoint.common.CloseConsumerHandler;
 
 /**
- * Native function to respond back the caller with inbound response.
- *
- * @since 0.96
+ * Close the message consumer object.
  */
 @BallerinaFunction(
-        orgName = "ballerina", packageName = "http",
-        functionName = "forward",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Connection",
-                             structPackage = "ballerina.http"),
-        args = {@Argument(name = "res", type = TypeKind.STRUCT, structType = "Response",
-                structPackage = "ballerina.http")},
-        returnType = @ReturnType(type = TypeKind.STRUCT, structType = "HttpConnectorError",
-                                 structPackage = "ballerina.http"),
+        orgName = "ballerina",
+        packageName = "jms",
+        functionName = "closeQueueReceiver",
+        receiver = @Receiver(type = TypeKind.STRUCT, structType = "QueueReceiver", structPackage = "ballerina.jms"),
+        args = {
+                @Argument(name = "connector", type = TypeKind.STRUCT, structType = "QueueReceiverConnector")
+        },
         isPublic = true
 )
-public class Forward extends ConnectionAction {
+public class CloseReceiver implements NativeCallableUnit {
+    @Override
+    public void execute(Context context, CallableUnitCallback callback) {
+        CloseConsumerHandler.handle(context);
+    }
 
     @Override
-    public void execute(Context context) {
-        super.execute(context);
+    public boolean isBlocking() {
+        return true;
     }
 }
