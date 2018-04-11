@@ -17,67 +17,58 @@
  *
  */
 
-package org.ballerinalang.net.jms.nativeimpl.endpoint.queue.consumer;
+package org.ballerinalang.net.jms.nativeimpl.endpoint.session;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.CallableUnitCallback;
 import org.ballerinalang.connector.api.Struct;
-import org.ballerinalang.model.NativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
-import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
+import org.ballerinalang.net.jms.AbstractBlockinAction;
 import org.ballerinalang.net.jms.Constants;
 import org.ballerinalang.net.jms.utils.BallerinaAdapter;
-import org.ballerinalang.util.exceptions.BallerinaException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
 /**
- * Create JMS consumer for a consumer endpoint.
- *
- * @since 0.970
+ * Unsubscribe a durable subscriber.
  */
+@BallerinaFunction(orgName = "ballerina",
+                   packageName = "jms",
+                   functionName = "unsubscribe",
+                   receiver = @Receiver(type = TypeKind.STRUCT,
+                                        structType = "Session",
+                                        structPackage = "ballerina.jms"),
+                   args = {
+                           @Argument(name = "subscriptionId",
+                                     type = TypeKind.STRING)
+                   },
+                   isPublic = true)
+public class Unsubscribe extends AbstractBlockinAction {
 
-@BallerinaFunction(
-        orgName = "ballerina",
-        packageName = "jms",
-        functionName = "createConsumer",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "QueueConsumer", structPackage = "ballerina.jms"),
-        args = {
-                @Argument(name = "session", type = TypeKind.STRUCT, structType = "Session")
-        },
-        isPublic = true
-)
-public class CreateConsumer implements NativeCallableUnit {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Unsubscribe.class);
+
     @Override
     public void execute(Context context, CallableUnitCallback callableUnitCallback) {
-        Struct queueConsumerBObject = BallerinaAdapter.getReceiverStruct(context);
 
-        BStruct sessionBObject = (BStruct) context.getRefArgument(1);
+        Struct sessionBObject = BallerinaAdapter.getReceiverObject(context);
+
         Session session = BallerinaAdapter.getNativeObject(sessionBObject,
                                                            Constants.JMS_SESSION,
                                                            Session.class,
                                                            context);
-        Struct queueConsumerConfigBRecord = queueConsumerBObject.getStructField(Constants.CONSUMER_CONFIG);
-        String queueName = queueConsumerConfigBRecord.getStringField(Constants.QUEUE_NAME);
+
+        String subscriptionId = context.getStringArgument(0);
 
         try {
-            Destination queue = session.createQueue(queueName);
-            MessageConsumer consumer = session.createConsumer(queue);
-            Struct consumerConnectorBObject = queueConsumerBObject.getStructField(Constants.CONSUMER_CONNECTOR);
-            consumerConnectorBObject.addNativeData(Constants.JMS_CONSUMER_OBJECT, consumer);
+            session.unsubscribe(subscriptionId);
         } catch (JMSException e) {
-            throw new BallerinaException("Error while creating Qeueu consumer", e, context);
+            BallerinaAdapter.returnError("Unsubscribe request failed.", context, e);
         }
-    }
-
-    @Override
-    public boolean isBlocking() {
-        return true;
     }
 }
