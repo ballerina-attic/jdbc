@@ -1,16 +1,16 @@
-package versioning.test;
+package abc.xyz;
 
 import ballerina/http;
 import ballerina/io;
 
-endpoint http:NonListeningServiceEndpoint passthruEP {
+endpoint http:NonListener passthruEP {
     port:9090
 };
 
 @http:ServiceConfig {
     basePath:"/hello1/{version}",
     versioning:{
-       pattern:"v{major}.{minor}",
+       pattern:"v{Major}.{Minor}",
        allowNoVersion:true,
        matchMajorVersion:true
     }
@@ -84,7 +84,7 @@ service<http:Service> hello4 bind passthruEP {
 @http:ServiceConfig {
     basePath:"/hello5/bar",
     versioning:{
-        pattern:"{major}.{minor}"
+        pattern:"{MAJOR}.{minor}"
     }
 }
 service<http:Service> hello5 bind passthruEP {
