@@ -40,13 +40,13 @@ import static org.ballerinalang.net.grpc.MessageConstants.PROTOCOL_STRUCT_PACKAG
 @BallerinaFunction(
         orgName = ORG_NAME,
         packageName = PROTOCOL_PACKAGE_GRPC,
-        functionName = "getClient",
+        functionName = "getCallerActions",
         receiver = @Receiver(type = TypeKind.STRUCT, structType = CLIENT_ENDPOINT_TYPE,
                              structPackage = PROTOCOL_STRUCT_PACKAGE_GRPC),
         returnType = {@ReturnType(type = TypeKind.CONNECTOR)},
         isPublic = true
 )
-public class GetClient extends BlockingNativeCallableUnit {
+public class GetCallerActions extends BlockingNativeCallableUnit {
 
     @Override
     public void execute(Context context) {

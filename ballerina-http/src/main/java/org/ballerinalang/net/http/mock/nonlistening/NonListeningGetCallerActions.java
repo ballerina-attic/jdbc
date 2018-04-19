@@ -16,15 +16,14 @@
  *  under the License.
  */
 
-package org.ballerinalang.net.http.serviceendpoint;
+package org.ballerinalang.net.http.mock.nonlistening;
 
 import org.ballerinalang.bre.Context;
-import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
-import org.ballerinalang.model.values.BStruct;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
 import org.ballerinalang.natives.annotations.ReturnType;
+import org.ballerinalang.net.http.serviceendpoint.GetCallerActions;
 
 /**
  * Get the ID of the connection.
@@ -34,18 +33,16 @@ import org.ballerinalang.natives.annotations.ReturnType;
 
 @BallerinaFunction(
         orgName = "ballerina", packageName = "http",
-        functionName = "getClient",
-        receiver = @Receiver(type = TypeKind.STRUCT, structType = "Listener",
-                             structPackage = "ballerina.http"),
+        functionName = "getCallerActions",
+        receiver = @Receiver(type = TypeKind.STRUCT, structType = "NonListener",
+                structPackage = "ballerina.http"),
         returnType = {@ReturnType(type = TypeKind.STRUCT)},
         isPublic = true
 )
-public class GetClient extends BlockingNativeCallableUnit {
+public class NonListeningGetCallerActions extends GetCallerActions {
 
     @Override
     public void execute(Context context) {
-        BStruct endpoint = (BStruct) context.getRefArgument(0);
-        BStruct connection = (BStruct) endpoint.getRefField(0);
-        context.setReturnValues(connection);
+        super.execute(context);
     }
 }
