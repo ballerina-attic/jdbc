@@ -29,11 +29,11 @@ documentation {
     F{{dbOptions}} - DB specific properties.
 }
 public type ClientEndpointConfiguration {
-    string host = "",
+    string host,
     int port = 0,
-    string name = "",
-    string username = "",
-    string password = "",
+    string name,
+    string username,
+    string password,
     sql:PoolOptions poolOptions,
     map dbOptions,
 };
@@ -45,7 +45,7 @@ documentation {
 }
 
 public type Client object {
-    public {
+    private {
         ClientEndpointConfiguration config;
         sql:CallerActions mysqlClient;
     }
@@ -55,14 +55,14 @@ public type Client object {
 
         P{{config}} - he ClientEndpointConfiguration of the endpoint.
     }
-    public function init(ClientEndpointConfiguration config) {
+    function init(ClientEndpointConfiguration config) {
         self.mysqlClient = createClient(config);
     }
 
     documentation {
         Returns the connector that the client code uses.
     }
-    public function getClient() returns sql:CallerActions {
+    function getClient() returns sql:CallerActions {
         return self.mysqlClient;
     }
 };
