@@ -1,4 +1,4 @@
-// Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -15,12 +15,12 @@
 // under the License.
 
 
-@Description {value:"Representation of Authentication handler for HTTP traffic. Any authention interceptor for
-basic authentication should be struct-wise similar to HttpAuthnInterceptor"}
-public type HttpAuthnHandler object {
-    public {
-        string name;
-    }
-    public function canHandle (Request req) returns (boolean);
-    public function handle (Request req) returns (boolean);
-};
+@Description {value:"Halts the current worker for a predefined amount of time."}
+@Param {value:"millis: Amount of time to sleep in milliseconds"}
+public native function sleep(int millis);
+
+// Todo - Remove
+@Description {value:"Returns the value associated with the specified property name."}
+@Param {value:"name: Name of the property"}
+@Return {value:"Value of the property if the property exists, an empty string otherwise"}
+public native function getProperty(@sensitive string name) returns (string);
