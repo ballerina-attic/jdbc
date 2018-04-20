@@ -68,7 +68,7 @@ function checkTableCount(string tablePrefix) returns (int) {
 
     int count;
     try {
-        var temp = testDB -> select("SELECT count(*) as count FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME like
+        var temp = testDB->select("SELECT count(*) as count FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME like
          ?", ResultCount, p1);
         table dt = check temp;
         while (dt.hasNext()) {
@@ -76,7 +76,7 @@ function checkTableCount(string tablePrefix) returns (int) {
             count = rs.COUNTVAL;
         }
     } finally {
-        _ = testDB -> close();
+        _ = testDB->close();
     }
     return count;
 }
@@ -221,11 +221,16 @@ function testPrintData() {
     Person p2 = {id:2, age:20, salary:200.50, name:"martin", married:true};
     Person p3 = {id:3, age:32, salary:100.50, name:"john", married:false};
 
-    table<Person> dt = table{};
+    table<Person> dt = table{index:["id", "age"], primaryKey:["id", "age"]};
     _ = dt.add(p1);
     _ = dt.add(p2);
     _ = dt.add(p3);
 
+    io:println(dt);
+}
+
+function testPrintDataEmptyTable() {
+    table<Person> dt = table{};
     io:println(dt);
 }
 
