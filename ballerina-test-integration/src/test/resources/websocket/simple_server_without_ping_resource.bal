@@ -13,25 +13,16 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-// This is server implementation for unary blocking/unblocking scenario
+
+import ballerina/http;
 import ballerina/io;
-import ballerina/grpc;
 
-// Server endpoint configuration
-endpoint grpc:Listener ep {
-    host:"localhost",
-    port:9090
-};
+@http:WebSocketServiceConfig {
+    path: "/test/without/ping/resource"
+}
+service<http:WebSocketService> SimpleServerWithoutPingResource bind { port: 9090 } {
 
-service HelloWorld bind ep {
-    hello(endpoint caller, string name, grpc:Headers headers) {
-        io:println("name: " + name);
-        string message = "Hello " + name;
-        io:println(headers.get("x-id"));
-        headers.setEntry("x-id", "1234567890");
-        error? err = caller->send(message, headers = headers);
-        string msg = "Server send response : " + message;
-        io:println(err.message but { () => ("Server send response : " + message) });
-        _ = caller->complete();
+    onOpen(endpoint wsEp) {
+        io:println("New Client Connected");
     }
 }
