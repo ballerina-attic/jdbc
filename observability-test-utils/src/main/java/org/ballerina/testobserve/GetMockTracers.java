@@ -17,11 +17,11 @@
  *
  */
 
-package org.ballerina.testing;
+package org.ballerina.testobserve;
 
 import com.google.gson.Gson;
 import io.opentracing.mock.MockTracer;
-import org.ballerina.testing.extension.BMockTracer;
+import org.ballerina.testobserve.extension.BMockTracer;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
@@ -37,7 +37,7 @@ import java.util.List;
  */
 @BallerinaFunction(
         orgName = "ballerina",
-        packageName = "testing",
+        packageName = "testobserve",
         functionName = "getMockTracers",
         returnType = {@ReturnType(type = TypeKind.ARRAY)},
         isPublic = true
