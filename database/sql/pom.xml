@@ -16,25 +16,20 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.ballerinalang</groupId>
         <artifactId>ballerina-parent</artifactId>
+        <groupId>org.ballerinalang</groupId>
         <version>0.975.1-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>ballerina-websub</artifactId>
+    <artifactId>ballerina-sql</artifactId>
     <packaging>jar</packaging>
-    <name>Ballerina - WebSub</name>
+    <name>Ballerina - sql</name>
     <url>http://ballerinalang.org</url>
 
     <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-core</artifactId>
@@ -43,71 +38,14 @@
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-lang</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.transport.http</groupId>
-            <artifactId>org.wso2.transport.http.netty</artifactId>
-        </dependency>
+        <!-- TODO check whether below dependency can be removed -->
         <dependency>
             <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-http</artifactId>
+            <artifactId>ballerina-time</artifactId>
         </dependency>
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-builtin</artifactId>
-            <type>zip</type>
-            <classifier>ballerina-binary-repo</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-mime</artifactId>
-            <type>zip</type>
-            <classifier>ballerina-binary-repo</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-crypto</artifactId>
-            <type>zip</type>
-            <classifier>ballerina-binary-repo</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-io</artifactId>
-            <type>zip</type>
-            <classifier>ballerina-binary-repo</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-log-api</artifactId>
-            <type>zip</type>
-            <classifier>ballerina-binary-repo</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-reflect</artifactId>
-            <type>zip</type>
-            <classifier>ballerina-binary-repo</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-config-api</artifactId>
-            <type>zip</type>
-            <classifier>ballerina-binary-repo</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-http</artifactId>
-            <type>zip</type>
-            <classifier>ballerina-binary-repo</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-sql</artifactId>
-            <type>zip</type>
-            <classifier>ballerina-binary-repo</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.ballerinalang</groupId>
-            <artifactId>ballerina-jdbc</artifactId>
             <type>zip</type>
             <classifier>ballerina-binary-repo</classifier>
         </dependency>
@@ -121,9 +59,14 @@
                     <exclude>ballerina/**</exclude>
                 </excludes>
             </resource>
+
+            <!-- copy built-in ballerina sources to the jar -->
+            <resource>
+                <directory>${generated.ballerina.source.directory}</directory>
+                <targetPath>META-INF/ballerina</targetPath>
+            </resource>
         </resources>
         <plugins>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -143,15 +86,10 @@
                                 </systemProperty>
                             </systemProperties>
                             <arguments>
-                                <!--is built in pkg loaded from source-->
                                 <argument>false</argument>
-                                <!--source project dir-->
                                 <argument>${basedir}/src/main/ballerina/</argument>
-                                <!--balo destination-->
                                 <argument>${project.build.directory}/generated-balo/repo/ballerina</argument>
-                                <!--ballerina home-->
                                 <argument>${project.build.directory}</argument>
-                                <!--not used-->
                                 <argument>${project.version}</argument>
                             </arguments>
                         </configuration>
@@ -179,33 +117,10 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- For ballerina annotation processing -->
-            <plugin>
-                <groupId>org.bsc.maven</groupId>
-                <artifactId>maven-processor-plugin</artifactId>
-                <version>${mvn.processor.plugin.version}</version>
-                <configuration>
-                    <processors>
-                        <processor>org.ballerinalang.codegen.BallerinaAnnotationProcessor</processor>
-                    </processors>
-                    <options>
-                        <nativeEntityProviderPackage>org.ballerinalang.net.websub.generated.providers</nativeEntityProviderPackage>
-                        <nativeEntityProviderClass>StandardNativeElementProvider</nativeEntityProviderClass>
-                    </options>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>process</id>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.5.2</version>
                 <executions>
                     <execution>
                         <id>distribution</id>
@@ -219,11 +134,39 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- For ballerina annotation processing -->
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>${mvn.processor.plugin.version}</version>
+                <configuration>
+                    <processors>
+                        <processor>org.ballerinalang.codegen.BallerinaAnnotationProcessor</processor>
+                    </processors>
+                    <options>
+                        <nativeEntityProviderPackage>org.ballerinalang.database.generated.providers</nativeEntityProviderPackage>
+                        <nativeEntityProviderClass>StandardNativeElementProvider</nativeEntityProviderClass>
+                    </options>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>process</id>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
+
     <properties>
+        <!-- Path to the generated natives ballerina files temp directory -->
+        <generated.ballerina.source.directory>${project.build.directory}/../src/main/ballerina</generated.ballerina.source.directory>
         <maven.spotbugsplugin.exclude.file>spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
         <maven.checkstyleplugin.excludes>**/generated/**</maven.checkstyleplugin.excludes>
     </properties>
+
 </project>
