@@ -41,10 +41,10 @@ public type WebSocketClient object {
     documentation {
         Gets called when the endpoint is being initialize during package init time.
 
-        P{{config}} The `WebSocketClientEndpointConfig` of the endpoint
+        P{{c}} The `WebSocketClientEndpointConfig` of the endpoint
     }
-    public function init(WebSocketClientEndpointConfig config) {
-        self.config = config;
+    public function init(WebSocketClientEndpointConfig c) {
+        self.config = c;
         initEndpoint();
     }
 
@@ -52,13 +52,6 @@ public type WebSocketClient object {
         Initializes the endpoint.
     }
     public native function initEndpoint();
-
-    documentation {
-        Gets called every time a service attaches itself to this endpoint - also happens at package init time.
-
-        P{{serviceType}} The service type
-    }
-    public native function register(typedesc serviceType);
 
     documentation {
         Allows access to connector that the client endpoint uses.
@@ -70,16 +63,15 @@ public type WebSocketClient object {
     }
 
     documentation {
-        Starts the registered service.
-    }
-    public native function start();
-
-    documentation {
         Stops the registered service.
     }
     public function stop() {
         WebSocketConnector webSocketConnector = getCallerActions();
-        error|() ignoredValue = webSocketConnector.close(1001, "The connection has been stopped");
+        error|() value = webSocketConnector.close(1001, "going away");
+        match value {
+            error err => throw err;
+            () => {}
+        }
     }
 };
 
