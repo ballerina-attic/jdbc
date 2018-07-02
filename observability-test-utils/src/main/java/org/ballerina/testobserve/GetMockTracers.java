@@ -14,19 +14,22 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
 
 package org.ballerina.testobserve;
 
+import com.google.gson.Gson;
 import io.opentracing.mock.MockTracer;
 import org.ballerina.testobserve.extension.BMockTracer;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
-import org.ballerinalang.model.values.BInteger;
+import org.ballerinalang.model.values.BJSON;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.ReturnType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,17 +38,21 @@ import java.util.List;
 @BallerinaFunction(
         orgName = "ballerina",
         packageName = "testobserve",
-        functionName = "getFinishedSpansCount",
-        returnType = {@ReturnType(type = TypeKind.INT)},
+        functionName = "getMockTracers",
+        returnType = {@ReturnType(type = TypeKind.JSON)},
         isPublic = true
 )
-public class GetFinishedSpansCount extends BlockingNativeCallableUnit {
+public class GetMockTracers extends BlockingNativeCallableUnit {
 
     @Override
     public void execute(Context context) {
-        List<MockTracer> mockTracer = BMockTracer.getTracerMap();
-        final int[] count = {0};
-        mockTracer.forEach((tracer) -> count[0] += tracer.finishedSpans().size());
-        context.setReturnValues(new BInteger(count[0]));
+        List<MockTracer> mockTracers = BMockTracer.getTracerMap();
+        List<BMockSpan> mockSpans = new ArrayList<>();
+        mockTracers
+                .forEach(mockTracer -> mockTracer.finishedSpans()
+                        .forEach(mockSpan -> mockSpans
+                                .add(new BMockSpan(mockSpan.operationName(), mockSpan.context().traceId(),
+                                        mockSpan.context().spanId(), mockSpan.parentId(), mockSpan.tags()))));
+        context.setReturnValues(new BJSON(new Gson().toJson(mockSpans)));
     }
 }
