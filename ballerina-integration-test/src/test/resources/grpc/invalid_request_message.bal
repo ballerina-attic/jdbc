@@ -13,11 +13,19 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import ballerina/io;
+import ballerina/grpc;
 
-import ballerina/http;
+endpoint grpc:Listener ep {
+    host:"localhost",
+    port:9090
+};
 
-service<http:WebSocketService> wsService bind { port: 9090 } {
-
-    onText(endpoint caller, int text, boolean final) {
+service HelloWorld bind ep {
+    invalidReqType(endpoint caller, string? name) {
+        string input = name but {() => ""};
+        string message = "Hello " + input;
+        error? err = caller->send(message);
+        _ = caller->complete();
     }
 }
