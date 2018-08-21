@@ -15,17 +15,26 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/io;
 
-@final string REMOTE_BACKEND_URL1 = "ws://localhost:15500/websocket";
+endpoint http:Client clientEP {
+    url:"http://localhost:9218",
+    proxy: {
+        host:"localhost",
+        port:9219
+    }
+};
 
-@http:WebSocketServiceConfig {
-    path: "/client/failure"
-}
-service<http:WebSocketService> clientFailure bind { port: 9091 } {
-
-    onOpen(endpoint wsEp) {
-        endpoint http:WebSocketClient wsClientEp {
-            url: REMOTE_BACKEND_URL1
-        };
+function main (string... args) {
+    http:Request req = new;
+    var resp = clientEP->post("/proxy/server", req);
+    match resp {
+        error err => io:println(err.message);
+        http:Response response => {
+            match (response.getTextPayload()) {
+                error payloadError => io:println(payloadError.message);
+                string res => io:println(res);
+            }
+        }
     }
 }
