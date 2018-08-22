@@ -15,18 +15,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.test.checkpointing.jsonSerializer;
+package org.ballerinalang.test.serializer.json;
 
+import org.ballerinalang.model.util.serializer.BValueSerializer;
+import org.ballerinalang.model.util.serializer.BValueTree;
+import org.ballerinalang.model.util.serializer.JsonSerializer;
+import org.ballerinalang.model.util.serializer.providers.bvalue.NumericBValueProviders;
 import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BValue;
-import org.ballerinalang.persistence.serializable.serializer.BValueSerializer;
-import org.ballerinalang.persistence.serializable.serializer.BValueTree;
-import org.ballerinalang.persistence.serializable.serializer.JsonSerializer;
-import org.ballerinalang.persistence.serializable.serializer.providers.bvalue.NumericBValueProviders;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -37,15 +36,21 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.util.Date;
 
-import static org.ballerinalang.persistence.serializable.serializer.JsonSerializerConst.PAYLOAD_TAG;
+import static org.ballerinalang.model.util.serializer.JsonSerializerConst.PAYLOAD_TAG;
 
+/**
+ * Test SerializationBValueProvider implementations.
+ */
 public class SerializationBValueProviderTest {
 
     private static final String NUMBER = "2345232323";
     BValueSerializer serializer;
 
     @BeforeMethod
-    public void setup() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public void setup() throws NoSuchMethodException,
+            IllegalAccessException,
+            InvocationTargetException,
+            InstantiationException {
         Constructor<BValueTree> constructor = BValueTree.class.getDeclaredConstructor();
         constructor.setAccessible(true);
         serializer = constructor.newInstance();

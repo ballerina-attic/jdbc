@@ -15,16 +15,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.test.checkpointing.jsonSerializer;
+package org.ballerinalang.test.serializer.json;
 
 import org.ballerinalang.launcher.util.BCompileUtil;
 import org.ballerinalang.launcher.util.CompileResult;
 import org.ballerinalang.model.types.BTypes;
+import org.ballerinalang.model.util.serializer.JsonSerializer;
 import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BRefValueArray;
 import org.ballerinalang.model.values.BString;
-import org.ballerinalang.persistence.serializable.serializer.JsonSerializer;
 import org.ballerinalang.persistence.store.PersistenceStore;
 import org.ballerinalang.test.checkpointing.TestStorageProvider;
 import org.ballerinalang.test.utils.debug.TestDebugger;
@@ -35,6 +35,11 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * Test Serialization of objects of various java types.
+ * <p>
+ * Note: make sure to test reference sharing.
+ */
 public class JsonSerializerTest {
     public static final String STRING_1 = "String1";
     public static final String STRING_2 = "String2";

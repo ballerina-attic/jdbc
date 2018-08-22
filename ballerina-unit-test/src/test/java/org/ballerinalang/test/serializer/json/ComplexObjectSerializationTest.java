@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.test.checkpointing.jsonSerializer;
+package org.ballerinalang.test.serializer.json;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -23,10 +23,10 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.ballerinalang.broker.BallerinaBrokerByteBuf;
+import org.ballerinalang.model.util.serializer.JsonSerializer;
 import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
-import org.ballerinalang.persistence.serializable.serializer.JsonSerializer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -34,6 +34,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Test serialization and deserialization of complex object structures.
+ */
 public class ComplexObjectSerializationTest {
     @Test(description = "Test serialize/deserialize HttpResponse Object")
     public void testJsonDeserializeHttpResponse() {
@@ -57,8 +60,11 @@ public class ComplexObjectSerializationTest {
         String serialize = jsonSerializer.serialize(mockComplexKeyMap());
 
         HashMap map = jsonSerializer.deserialize(serialize, HashMap.class);
-        boolean matchedKey1 = map.keySet().stream().anyMatch(k -> ((JsonSerializerTest.StringFieldA) k).a.equals("Key1"));
-        boolean matchedKey2 = map.keySet().stream().anyMatch(k -> ((JsonSerializerTest.StringFieldA) k).a.equals("Key2"));
+        boolean matchedKey1 = map.keySet().stream()
+                .anyMatch(k -> ((JsonSerializerTest.StringFieldA) k).a.equals("Key1"));
+
+        boolean matchedKey2 = map.keySet().stream()
+                .anyMatch(k -> ((JsonSerializerTest.StringFieldA) k).a.equals("Key2"));
         Assert.assertTrue(matchedKey1 && matchedKey2);
     }
 
@@ -134,8 +140,8 @@ public class ComplexObjectSerializationTest {
     }
 
     private static class ReadResolverClass implements Serializable {
-        int i;
         public boolean resolved = false;
+        int i;
 
         public ReadResolverClass(int i) {
             this.i = i;

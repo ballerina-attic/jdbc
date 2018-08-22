@@ -15,15 +15,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.test.checkpointing.jsonSerializer;
+package org.ballerinalang.test.serializer.json;
 
-import org.ballerinalang.persistence.serializable.serializer.TypeInstanceProvider;
-import org.ballerinalang.persistence.serializable.serializer.TypeInstanceProviderFactory;
+import org.ballerinalang.model.util.serializer.TypeInstanceProvider;
+import org.ballerinalang.model.util.serializer.TypeInstanceProviderFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
  * TypeInstanceProviderFactory test cases.
+ * <p>
+ * {@link TypeInstanceProviderFactory} dynamically create TypeInstanceProvider implementations.
  */
 public class TypeInstanceProviderFactoryTest {
     @Test
