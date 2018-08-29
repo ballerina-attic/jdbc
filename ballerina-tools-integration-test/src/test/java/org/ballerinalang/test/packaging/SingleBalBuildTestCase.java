@@ -20,8 +20,8 @@ package org.ballerinalang.test.packaging;
 import org.ballerinalang.test.BaseTest;
 import org.ballerinalang.test.context.BMainInstance;
 import org.ballerinalang.test.context.BallerinaTestException;
-import org.ballerinalang.test.context.Constant;
 import org.ballerinalang.test.context.LogLeecher;
+import org.ballerinalang.test.utils.PackagingTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -32,21 +32,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Testing building of a single bal file.
  */
-public class PackagingSingleBalBuildTestCase extends BaseTest {
-    private String serverZipPath;
+public class SingleBalBuildTestCase extends BaseTest {
     private Path tempProjectDirectory;
     private Path balFilePath;
+    private Map<String, String> envVariables;
 
     @BeforeClass()
     public void setUp() throws BallerinaTestException, IOException {
         tempProjectDirectory = Files.createTempDirectory("bal-test-integration-packaging-single-bal-");
+        envVariables = PackagingTestUtils.getEnvVariables();
         Path tempPackage = tempProjectDirectory.resolve("sourcePkg");
         Files.createDirectories(tempPackage);
 
@@ -62,8 +61,6 @@ public class PackagingSingleBalBuildTestCase extends BaseTest {
                 "    io:println(\"Hello World!\");\n" +
                 "}\n";
         Files.write(balFilePath, mainFuncContent.getBytes(), StandardOpenOption.CREATE);
-
-        serverZipPath = System.getProperty(Constant.SYSTEM_PROP_SERVER_ZIP);
     }
 
     @Test(description = "Test building a bal file by giving the absolute path")
@@ -71,10 +68,8 @@ public class PackagingSingleBalBuildTestCase extends BaseTest {
         Path currentDirPath = tempProjectDirectory.resolve("foo");
         Files.createDirectories(currentDirPath);
 
-        // Test ballerina build
-        BMainInstance ballerinaServer = new BMainInstance(balServer);
         String[] clientArgs = {balFilePath.toString()};
-        ballerinaServer.runMain("build", clientArgs, System.getenv(),
+        balClient.runMain("build", clientArgs, envVariables,
                 new String[]{}, new LogLeecher[]{}, currentDirPath.toString());
         Path generatedBalx = currentDirPath.resolve("main.balx");
         Assert.assertTrue(Files.exists(generatedBalx));
@@ -83,56 +78,28 @@ public class PackagingSingleBalBuildTestCase extends BaseTest {
     @Test(description = "Test building a bal file by giving the path from the current directory")
     public void testBuildingSourceWithCurrentDir() throws Exception {
         // Test ballerina build
-        BMainInstance ballerinaServer = new BMainInstance(balServer);
         String[] clientArgs = {Paths.get("sourcePkg", "main.bal").toString()};
-        ballerinaServer.runMain("build", clientArgs, System.getenv(), new String[]{},
+        balClient.runMain("build", clientArgs, envVariables, new String[]{},
                 new LogLeecher[]{}, tempProjectDirectory.toString());
         Path generatedBalx = tempProjectDirectory.resolve("main.balx");
         Assert.assertTrue(Files.exists(generatedBalx));
     }
 
-    @Test(description = "Test building a bal file to the output file given by the user")
+    @Test(description = "Test building a bal file to the output file givenby the user")
     public void testBuildingSourceToOutput() throws Exception {
         Path targetDirPath = tempProjectDirectory.resolve("target");
         Files.createDirectories(targetDirPath);
 
         // Test ballerina build
-        BMainInstance ballerinaServer = new BMainInstance(balServer);
-        String[] clientArgs = {"-o", targetDirPath.resolve("main.bal").toString(),
-                balFilePath.toString()};
-        ballerinaServer.runMain("build", clientArgs, getEnv(), new String[]{},
+        String[] clientArgs = {"-o", targetDirPath.resolve("main.bal").toString(), balFilePath.toString()};
+        balClient.runMain("build", clientArgs, envVariables, new String[]{},
                 new LogLeecher[]{}, tempProjectDirectory.toString());
         Path generatedBalx = targetDirPath.resolve("main.balx");
         Assert.assertTrue(Files.exists(generatedBalx));
     }
 
-    private Map<String, String> getEnv() {
-        Map<String, String> envVarMap = System.getenv();
-        Map<String, String> retMap = new HashMap<>();
-        envVarMap.forEach(retMap::put);
-        return retMap;
-    }
-
     @AfterClass
     private void cleanup() throws Exception {
-        deleteFiles(tempProjectDirectory);
-    }
-
-    /**
-     * Delete files inside directories.
-     *
-     * @param dirPath directory path
-     * @throws IOException throw an exception if an issue occurs
-     */
-    private void deleteFiles(Path dirPath) throws IOException {
-        Files.walk(dirPath)
-             .sorted(Comparator.reverseOrder())
-             .forEach(path -> {
-                 try {
-                     Files.delete(path);
-                 } catch (IOException e) {
-                     Assert.fail(e.getMessage(), e);
-                 }
-             });
+        PackagingTestUtils.deleteFiles(tempProjectDirectory);
     }
 }

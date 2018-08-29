@@ -15,12 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.test.packaging.grpc;
+package org.ballerinalang.test.grpc;
 
 import org.ballerinalang.test.BaseTest;
 import org.ballerinalang.test.context.BMainInstance;
 import org.ballerinalang.test.context.BServerInstance;
-import org.ballerinalang.test.context.Constant;
 import org.ballerinalang.test.context.LogLeecher;
 import org.ballerinalang.test.context.Utils;
 import org.testng.annotations.AfterClass;
@@ -40,12 +39,10 @@ import java.util.Map;
 public class ServicePackagingTestCase extends BaseTest {
 
     private Path tempProjectDirectory;
-    private String serverZipPath = System.getProperty(Constant.SYSTEM_PROP_SERVER_ZIP);
 
     @BeforeClass()
     public void setup() throws IOException {
         tempProjectDirectory = Files.createTempDirectory("bal-test-integration-packaging-project-");
-        serverZipPath = System.getProperty(Constant.SYSTEM_PROP_SERVER_ZIP);
     }
 
     @Test(description = "Test packaged service with nested ballerina record type for input and output")
@@ -67,6 +64,7 @@ public class ServicePackagingTestCase extends BaseTest {
         ballerinaBuildServer.runMain("build", new String[0], getEnvVariables(), new String[]{},
                 new LogLeecher[]{}, projectPath.toString());
         Path generatedBalx = projectPath.resolve("target").resolve("foo.balx");
+
         // Run gRPC service from the balx file.
         BServerInstance ballerinaServerForService = new BServerInstance(balServer);
         ballerinaServerForService.startServer(generatedBalx.toString());
@@ -78,6 +76,7 @@ public class ServicePackagingTestCase extends BaseTest {
             String balFile = balFilePath.toAbsolutePath().toString();
             LogLeecher logLeecher1 = new LogLeecher("testInputNestedStruct output: Submitted name: Danesh");
             LogLeecher logLeecher2 = new LogLeecher("testOutputNestedStruct output: Sam");
+
             ballerinaClientServer.runMain(balFile, new String[]{}, new String[]{}, getEnvVariables(),
                     new String[]{}, new LogLeecher[]{logLeecher1, logLeecher2});
             logLeecher1.waitForText(10000);
