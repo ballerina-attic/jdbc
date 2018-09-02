@@ -14,39 +14,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/file;
+import ballerina/http;
+import ballerina/io;
 
-endpoint file:Listener localFolder {
-    path:"target/fs",
-    recursive:false
-};
-
-boolean createInvoke = false;
-boolean modifyInvoke = false;
-boolean deleteInvoke = false;
-
-service fileSystem bind localFolder {
-    onCreate (file:FileEvent m) {
-        createInvoke = true;
-    }
-
-    onModify(file:FileEvent m) {
-        modifyInvoke = true;
-    }
-
-    onDelete(file:FileEvent m) {
-        deleteInvoke = true;
+service<http:WebSocketService> onBinaryContinuation bind { port: 9088 } {
+    byte[] content;
+    onBinary(endpoint caller, byte[] data, boolean final) {
+        if (final) {
+            appendToArray(data, content);
+            _ = caller->pushBinary(content);
+        } else {
+            appendToArray(data, content);
+        }
     }
 }
 
-function isCreateInvoked() returns boolean {
-    return createInvoke;
-}
-
-function isModifyInvoked() returns boolean {
-    return createInvoke;
-}
-
-function isDeleteInvoked() returns boolean {
-    return createInvoke;
+function appendToArray(byte[] src, byte[] dest) {
+    int i = 0;
+    int l = lengthof src;
+    while (i < l) {
+        dest[lengthof dest] = src[i];
+        i = i + 1;
+    }
 }
