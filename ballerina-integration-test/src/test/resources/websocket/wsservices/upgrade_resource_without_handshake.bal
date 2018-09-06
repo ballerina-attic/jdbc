@@ -14,39 +14,25 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/file;
+import ballerina/http;
+import ballerina/io;
 
-endpoint file:Listener localFolder {
-    path:"target/fs",
-    recursive:false
-};
+service<http:Service> UpgradeWithoutHandshake bind { port: 9079 } {
 
-boolean createInvoke = false;
-boolean modifyInvoke = false;
-boolean deleteInvoke = false;
-
-service fileSystem bind localFolder {
-    onCreate (file:FileEvent m) {
-        createInvoke = true;
+    @http:ResourceConfig {
+        webSocketUpgrade: {
+            upgradeService: upgradeService
+        }
     }
-
-    onModify(file:FileEvent m) {
-        modifyInvoke = true;
-    }
-
-    onDelete(file:FileEvent m) {
-        deleteInvoke = true;
+    websocketProxy(endpoint caller, http:Request req) {
+        io:println("Simply log something");
     }
 }
 
-function isCreateInvoked() returns boolean {
-    return createInvoke;
+service<http:WebSocketService> upgradeService {
+
+    onOpen(endpoint caller) {
+        _ = caller->pushText("Handshake check");
+    }
 }
 
-function isModifyInvoked() returns boolean {
-    return modifyInvoke;
-}
-
-function isDeleteInvoked() returns boolean {
-    return deleteInvoke;
-}

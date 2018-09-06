@@ -14,39 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/file;
+import ballerina/http;
+import ballerina/io;
 
-endpoint file:Listener localFolder {
-    path:"target/fs",
-    recursive:false
-};
-
-boolean createInvoke = false;
-boolean modifyInvoke = false;
-boolean deleteInvoke = false;
-
-service fileSystem bind localFolder {
-    onCreate (file:FileEvent m) {
-        createInvoke = true;
+service<http:WebSocketService> pushTextFailure bind { port: 9089 } {
+    byte[] content;
+    onOpen(endpoint caller) {
+        _ = caller->close(timeoutInSecs = 0);
+        caller->pushText("hey") but {error err => io:println(err.message)};
     }
-
-    onModify(file:FileEvent m) {
-        modifyInvoke = true;
-    }
-
-    onDelete(file:FileEvent m) {
-        deleteInvoke = true;
-    }
-}
-
-function isCreateInvoked() returns boolean {
-    return createInvoke;
-}
-
-function isModifyInvoked() returns boolean {
-    return modifyInvoke;
-}
-
-function isDeleteInvoked() returns boolean {
-    return deleteInvoke;
 }
