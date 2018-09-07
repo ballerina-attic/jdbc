@@ -1,6 +1,6 @@
 import ballerina/io;
 
-
+// TODO: move to DataChannel native impl
 public type ChannelReader object {
     io:ByteChannel channel;
 
