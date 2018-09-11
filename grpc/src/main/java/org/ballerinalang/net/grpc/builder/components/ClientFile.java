@@ -18,30 +18,24 @@
 package org.ballerinalang.net.grpc.builder.components;
 
 /**
- * Bean class of client endpoint object.
+ * gRPC client file bean class.
+ *
+ * @since 0.982.0
  */
-public class EndPoint {
-    private String connectorId;
-    private String connectorIdName;
+public class ClientFile {
+    private String serviceName;
+    private boolean blockingEP;
     
-    public EndPoint(String connectorId) {
-        this.connectorId = connectorId;
-        this.connectorIdName = Character.toLowerCase(connectorId.charAt(0)) + connectorId.substring(1);
+    public ClientFile(String serviceName, boolean blockingEP) {
+        this.serviceName = serviceName;
+        this.blockingEP = blockingEP;
     }
-    
-    public String getConnectorId() {
-        return connectorId;
+
+    public String getServiceName() {
+        return serviceName;
     }
-    
-    public void setConnectorId(String connectorId) {
-        this.connectorId = connectorId;
-    }
-    
-    public String getConnectorIdName() {
-        return connectorIdName;
-    }
-    
-    public void setConnectorIdName(String connectorIdName) {
-        this.connectorIdName = connectorIdName;
+
+    public boolean isBlockingEP() {
+        return blockingEP;
     }
 }

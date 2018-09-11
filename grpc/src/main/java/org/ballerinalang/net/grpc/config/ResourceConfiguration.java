@@ -15,33 +15,35 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.ballerinalang.net.grpc.builder.components;
+package org.ballerinalang.net.grpc.config;
+
+import org.wso2.ballerinalang.compiler.semantics.model.types.BType;
 
 /**
- * Bean class of client get function object.
+ * Resource configuration of gRPC Service.
+ *
+ * @since 0.982.0
  */
-public class StubFunctionBuilder {
-    private String connectorId;
-    private String stubTypeName;
-    
-    public StubFunctionBuilder(String connectorId, String stubTypeName) {
-        this.connectorId = connectorId;
-        this.stubTypeName = stubTypeName;
+public class ResourceConfiguration {
+    private boolean streaming;
+    private BType requestType;
+    private BType responseType;
+
+    public ResourceConfiguration(boolean streaming, BType requestType, BType responseType) {
+        this.streaming = streaming;
+        this.requestType = requestType;
+        this.responseType = responseType;
     }
-    
-    public String getConnectorId() {
-        return connectorId;
+
+    public boolean isStreaming() {
+        return streaming;
     }
-    
-    public void setConnectorId(String connectorId) {
-        this.connectorId = connectorId;
+
+    public BType getRequestType() {
+        return requestType;
     }
-    
-    public String getStubTypeName() {
-        return stubTypeName;
-    }
-    
-    public void setStubTypeName(String stubTypeName) {
-        this.stubTypeName = stubTypeName;
+
+    public BType getResponseType() {
+        return responseType;
     }
 }
