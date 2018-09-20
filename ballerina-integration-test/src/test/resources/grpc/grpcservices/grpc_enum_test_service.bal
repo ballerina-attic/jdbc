@@ -13,8 +13,31 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import ballerina/grpc;
 
-# Get the mock tracers object.
-#
-# + return - Mock tracers object in json format
-public extern function getMockTracers () returns json;
+endpoint grpc:Listener listener {
+    host:"localhost",
+    port:8555
+};
+
+map<orderInfo> ordersMap;
+
+type orderInfo record {
+    string id;
+    Mode mode;
+};
+
+public type Mode "r";
+@final public Mode READ = "r";
+
+@grpc:ServiceConfig
+service testEnumService bind listener {
+    testEnum(endpoint caller, orderInfo orderReq) {
+        string permission;
+        match orderReq.mode {
+            READ => permission = "r";
+        }
+        _ = caller->send(permission);
+        _ = caller->complete();
+    }
+}
