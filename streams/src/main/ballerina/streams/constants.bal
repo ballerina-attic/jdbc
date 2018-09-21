@@ -14,12 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents an event which will trigger when there is a changes to listining direcotry.
-#
-# + name - Absolute file URI for triggerd event
-# + operation - Triggered event action. This can be create, delete or modify
-public type FileEvent record {
-    string name;
-    string operation;
-    !...
-};
+public type EventType "CURRENT"|"EXPIRED"|"ALL"|"RESET"|"TIMER";
+public type JoinType "INNER"|"LEFT"|"RIGHT"|"FULL";
+public string OUTPUT = "OUTPUT";
+public EventType RESET = "RESET";
+public EventType EXPIRED = "EXPIRED";
+public string DEFAULT = "DEFAULT";
+public string DELIMITER = ".";
+public string DELIMITER_REGEX = "\\.";
