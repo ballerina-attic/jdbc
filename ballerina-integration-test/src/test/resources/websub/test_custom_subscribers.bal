@@ -13,6 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
 import ballerina/http;
 import ballerina/io;
 import ballerina/websub;
@@ -20,20 +21,20 @@ import ballerina/websub;
 @final string MOCK_HEADER = "MockHeader";
 
 public type WebhookListenerConfiguration record {
-    string host,
-    int port,
+    string host;
+    int port;
 };
 
 public type MockActionEvent record {
-    string action,
+    string action;
 };
 
 public type MockDomainEvent record {
-    string domain,
+    string domain;
 };
 
 endpoint WebhookListenerForPayload listenerOneEP {
-    port:8181
+    port:8585
 };
 
 @websub:SubscriberServiceConfig {
@@ -54,7 +55,7 @@ service<WebhookServiceForPayload> keyWebhook bind listenerOneEP {
 }
 
 endpoint WebhookListenerForHeader listenerTwoEP {
-    port:8282
+    port:8686
 };
 
 @websub:SubscriberServiceConfig {
@@ -77,7 +78,7 @@ service<WebhookServiceForHeader> headerWebhook bind listenerTwoEP {
 }
 
 endpoint WebhookListenerForHeaderAndPayload listenerThreeEP {
-    port:8383
+    port:8787
 };
 
 @websub:SubscriberServiceConfig {
