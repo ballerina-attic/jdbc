@@ -14,7 +14,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.test.connectors.sql.transaction;
+package org.ballerinalang.test.jdbc.transaction;
 
 import org.ballerinalang.launcher.util.BCompileUtil;
 import org.ballerinalang.launcher.util.BRunUtil;
@@ -40,7 +40,7 @@ public class SQLTransactionsTest {
 
     @BeforeClass
     public void setup() {
-        result = BCompileUtil.compile("test-src/connectors/sql/transaction/sql_transaction_test.bal");
+        result = BCompileUtil.compile("test-src/jdbc/transaction/sql_transaction_test.bal");
         SQLDBUtils.deleteFiles(new File(SQLDBUtils.DB_DIRECTORY), DB_NAME);
         SQLDBUtils.initHSQLDBDatabase(SQLDBUtils.DB_DIRECTORY, DB_NAME, "datafiles/sql/SQLTableCreate.sql");
     }
@@ -199,6 +199,13 @@ public class SQLTransactionsTest {
         Assert.assertEquals(((BInteger) returns[0]).intValue(), 0, "Transaction shouldn't have been retried");
         Assert.assertEquals(((BInteger) returns[1]).intValue(), 0, "Insertion count inside transaction is incorrect");
         Assert.assertEquals(returns[2].stringValue(), "start txL1 txL2 txL3 txL3_Else txL3_Failed");
+    }
+
+    @Test(groups = TRANSACTION_TEST_GROUP)
+    public void testLocalTransactonWithSelect() {
+        BValue[] returns = BRunUtil.invoke(result, "testLocalTransactonWithSelect");
+        Assert.assertEquals(((BInteger) returns[0]).intValue(), 0);
+        Assert.assertEquals(((BInteger) returns[1]).intValue(), 2);
     }
 
     @Test(dependsOnGroups = TRANSACTION_TEST_GROUP)
