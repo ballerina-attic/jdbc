@@ -14,7 +14,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.test.jdbc;
+package org.ballerinax.test.jdbc;
 
 import org.ballerinalang.launcher.util.BCompileUtil;
 import org.ballerinalang.launcher.util.BRunUtil;
@@ -29,11 +29,11 @@ import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BStringArray;
 import org.ballerinalang.model.values.BValue;
-import org.ballerinalang.test.utils.SQLDBUtils;
-import org.ballerinalang.test.utils.SQLDBUtils.ContainerizedTestDatabase;
-import org.ballerinalang.test.utils.SQLDBUtils.DBType;
-import org.ballerinalang.test.utils.SQLDBUtils.FileBasedTestDatabase;
-import org.ballerinalang.test.utils.SQLDBUtils.TestDatabase;
+import org.ballerinax.test.utils.SQLDBUtils;
+import org.ballerinax.test.utils.SQLDBUtils.ContainerizedTestDatabase;
+import org.ballerinax.test.utils.SQLDBUtils.DBType;
+import org.ballerinax.test.utils.SQLDBUtils.FileBasedTestDatabase;
+import org.ballerinax.test.utils.SQLDBUtils.TestDatabase;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeClass;
@@ -44,10 +44,10 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.util.Calendar;
 
-import static org.ballerinalang.test.utils.SQLDBUtils.DBType.H2;
-import static org.ballerinalang.test.utils.SQLDBUtils.DBType.HSQLDB;
-import static org.ballerinalang.test.utils.SQLDBUtils.DBType.MYSQL;
-import static org.ballerinalang.test.utils.SQLDBUtils.DBType.POSTGRES;
+import static org.ballerinax.test.utils.SQLDBUtils.DBType.H2;
+import static org.ballerinax.test.utils.SQLDBUtils.DBType.HSQLDB;
+import static org.ballerinax.test.utils.SQLDBUtils.DBType.MYSQL;
+import static org.ballerinax.test.utils.SQLDBUtils.DBType.POSTGRES;
 
 /**
  * Test class for SQL Connector actions test.
@@ -80,17 +80,17 @@ public class SQLActionsTest {
     public void setup() {
         switch (dbType) {
         case MYSQL:
-            testDatabase = new ContainerizedTestDatabase(dbType, "datafiles/sql/SQLTest_Mysql_Data.sql");
+            testDatabase = new ContainerizedTestDatabase(dbType, "sqlfiles/SQLTest_Mysql_Data.sql");
             break;
         case POSTGRES:
-            testDatabase = new ContainerizedTestDatabase(dbType, "datafiles/sql/SQLTest_Postgres_Data.sql");
+            testDatabase = new ContainerizedTestDatabase(dbType, "sqlfiles/SQLTest_Postgres_Data.sql");
             break;
         case H2:
-            testDatabase = new FileBasedTestDatabase(dbType, "datafiles/sql/SQLTest_H2_Data.sql",
+            testDatabase = new FileBasedTestDatabase(dbType, "sqlfiles/SQLTest_H2_Data.sql",
                     DB_DIRECTORY_H2, DB_NAME_H2);
             break;
         case HSQLDB:
-            testDatabase = new FileBasedTestDatabase(dbType, "datafiles/sql/SQLTest_HSQL_Data.sql",
+            testDatabase = new FileBasedTestDatabase(dbType, "sqlfiles/SQLTest_HSQL_Data.sql",
                     SQLDBUtils.DB_DIRECTORY, DB_NAME);
             break;
         default:
@@ -101,8 +101,8 @@ public class SQLActionsTest {
         connectionArgs[1] = new BString(testDatabase.getUsername());
         connectionArgs[2] = new BString(testDatabase.getPassword());
 
-        result = BCompileUtil.compile("test-src/jdbc/sql_actions_test.bal");
-        resultNegative = BCompileUtil.compile("test-src/jdbc/sql_actions_negative_test.bal");
+        result = BCompileUtil.compile("balfiles/sql_actions_test.bal");
+        resultNegative = BCompileUtil.compile("balfiles/sql_actions_negative_test.bal");
     }
 
     @Test(groups = CONNECTOR_TEST)

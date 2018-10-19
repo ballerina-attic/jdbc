@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.ballerinalang.database.jdbc;
+package org.ballerinax.jdbc;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
@@ -36,7 +36,7 @@ import org.ballerinalang.natives.annotations.BallerinaFunction;
  */
 
 @BallerinaFunction(
-        orgName = "ballerina", packageName = "jdbc",
+        orgName = "ballerinax", packageName = "jdbc:0.0.0",
         functionName = "createClient",
         args = {@Argument(name = "config", type = TypeKind.RECORD, structType = "ClientEndpointConfig")},
         isPublic = true

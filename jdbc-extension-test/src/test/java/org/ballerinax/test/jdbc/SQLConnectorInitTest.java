@@ -14,14 +14,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.test.jdbc;
+package org.ballerinax.test.jdbc;
 
 import org.ballerinalang.launcher.util.BCompileUtil;
 import org.ballerinalang.launcher.util.BRunUtil;
 import org.ballerinalang.launcher.util.CompileResult;
 import org.ballerinalang.model.values.BValue;
-import org.ballerinalang.test.utils.SQLDBUtils;
 import org.ballerinalang.util.exceptions.BLangRuntimeException;
+import org.ballerinax.test.utils.SQLDBUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeClass;
@@ -39,23 +39,23 @@ public class SQLConnectorInitTest {
 
     @BeforeClass
     public void setup() {
-        result = BCompileUtil.compile("test-src/jdbc/sql_connector_init_test.bal");
+        result = BCompileUtil.compile("balfiles/sql_connector_init_test.bal");
         SQLDBUtils.deleteFiles(new File(SQLDBUtils.DB_DIRECTORY), DB_NAME);
-        SQLDBUtils.initHSQLDBDatabase(SQLDBUtils.DB_DIRECTORY, DB_NAME, "datafiles/sql/SQLTableCreate.sql");
+        SQLDBUtils.initHSQLDBDatabase(SQLDBUtils.DB_DIRECTORY, DB_NAME, "sqlfiles/SQLTableCreate.sql");
     }
 
     @Test
     public void testConnectorWithDefaultPropertiesForListedDB() {
-         BValue[] returns = BRunUtil.invokeFunction(result, "testConnectorWithDefaultPropertiesForListedDB");
-         final String expected = "[{\"FIRSTNAME\":\"Peter\"}]";
-         Assert.assertEquals(returns[0].stringValue(), expected);
+        BValue[] returns = BRunUtil.invokeFunction(result, "testConnectorWithDefaultPropertiesForListedDB");
+        final String expected = "[{\"FIRSTNAME\":\"Peter\"}]";
+        Assert.assertEquals(returns[0].stringValue(), expected);
     }
 
     @Test
     public void testConnectorWithWorkers() {
-         BValue[] returns = BRunUtil.invokeFunction(result, "testConnectorWithWorkers");
-         final String expected = "[{\"FIRSTNAME\":\"Peter\"}]";
-         Assert.assertEquals(returns[0].stringValue(), expected);
+        BValue[] returns = BRunUtil.invokeFunction(result, "testConnectorWithWorkers");
+        final String expected = "[{\"FIRSTNAME\":\"Peter\"}]";
+        Assert.assertEquals(returns[0].stringValue(), expected);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class SQLConnectorInitTest {
     }
 
     @Test(expectedExceptions = BLangRuntimeException.class,
-          expectedExceptionsMessageRegExp = ".*error in sql connector configuration:Failed to initialize pool: "
+          expectedExceptionsMessageRegExp = ".*error in jdbc connector configuration:Failed to initialize pool: "
                   + "Database does not exists: ./target/tempdb/NON_EXISTING_DB.*")
     public void testConnectionFailure() {
         BRunUtil.invokeFunction(result, "testConnectionFailure");
