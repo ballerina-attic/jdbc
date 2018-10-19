@@ -26,7 +26,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>ballerina-jdbc</artifactId>
     <packaging>jar</packaging>
-    <name>Ballerina - jdbc</name>
+    <name>Ballerinax - jdbc</name>
     <url>http://ballerinalang.org</url>
 
     <dependencies>
