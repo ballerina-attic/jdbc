@@ -15,14 +15,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.ballerinalang.test.jdbc.transaction;
+package org.ballerinax.test.jdbc.transaction;
 
 import org.ballerinalang.launcher.util.BCompileUtil;
 import org.ballerinalang.launcher.util.BRunUtil;
 import org.ballerinalang.launcher.util.CompileResult;
 import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BValue;
-import org.ballerinalang.test.utils.SQLDBUtils;
+import org.ballerinax.test.utils.SQLDBUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeClass;
@@ -40,11 +40,12 @@ public class SQLXATransactionsTest {
 
     @BeforeClass
     public void setup() {
-        result = BCompileUtil.compile("test-src/jdbc/transaction/sql_xa_transaction_test.bal");
+        result = BCompileUtil.compile("balfiles/transaction/sql_xa_transaction_test.bal");
         SQLDBUtils.deleteFiles(new File(SQLDBUtils.DB_DIRECTORY_H2_1), DB_NAME1);
         SQLDBUtils.deleteFiles(new File(SQLDBUtils.DB_DIRECTORY_H2_2), DB_NAME2);
-        SQLDBUtils.initH2Database(SQLDBUtils.DB_DIRECTORY_H2_1, DB_NAME1, "datafiles/sql/SQLH2CustomerTableCreate.sql");
-        SQLDBUtils.initH2Database(SQLDBUtils.DB_DIRECTORY_H2_2, DB_NAME2, "datafiles/sql/SQLH2SalaryTableCreate.sql");
+        SQLDBUtils
+                .initH2Database(SQLDBUtils.DB_DIRECTORY_H2_1, DB_NAME1, "sqlfiles/SQLH2CustomerTableCreate.sql");
+        SQLDBUtils.initH2Database(SQLDBUtils.DB_DIRECTORY_H2_2, DB_NAME2, "sqlfiles/SQLH2SalaryTableCreate.sql");
     }
 
     @Test
