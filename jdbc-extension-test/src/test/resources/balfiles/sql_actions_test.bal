@@ -1507,19 +1507,19 @@ function testSelectLoadToMemory(string jdbcUrl, string userName, string password
     int i = 0;
     foreach x in dt {
         fullNameArray1[i] = x;
-        i++;
+        i += 1;
     }
 
     i = 0;
     foreach x in dt {
         fullNameArray2[i] = x;
-        i++;
+        i += 1;
     }
 
     i = 0;
     foreach x in dt {
         fullNameArray3[i] = x;
-        i++;
+        i += 1;
     }
 
     testDB.stop();
@@ -1544,13 +1544,13 @@ function testLoadToMemorySelectAfterTableClose(string jdbcUrl, string userName, 
     int i = 0;
     foreach x in dt {
         fullNameArray1[i] = x;
-        i++;
+        i += 1;
     }
 
     i = 0;
     foreach x in dt {
         fullNameArray2[i] = x;
-        i++;
+        i += 1;
     }
     dt.close();
     i = 0;
@@ -1558,7 +1558,7 @@ function testLoadToMemorySelectAfterTableClose(string jdbcUrl, string userName, 
     try {
         foreach x in dt {
             fullNameArray3[i] = x;
-            i++;
+            i += 1;
         }
     } catch (error err) {
         e = err;
