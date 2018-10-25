@@ -16,13 +16,4 @@
   ~ under the License.
   -->
 <FindBugsFilter>
-    <Match>
-        <Package name="org.ballerinalang.database.sql.actions"/>
-    </Match>
-    <Match>
-        <Package name="org.ballerinalang.database.h2"/>
-    </Match>
-    <Match>
-        <Package name="org.ballerinalang.database.mysql"/>
-    </Match>
 </FindBugsFilter>
