@@ -94,7 +94,7 @@
             <artifactId>ballerina-builtin</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.ballerina</groupId>
+            <groupId>org.ballerinax.jdbc</groupId>
             <artifactId>jdbc-extension</artifactId>
         </dependency>
         <dependency>
@@ -194,7 +194,7 @@
             <classifier>ballerina-binary-repo</classifier>
         </dependency>
         <dependency>
-            <groupId>io.ballerina</groupId>
+            <groupId>org.ballerinax.jdbc</groupId>
             <artifactId>jdbc-extension</artifactId>
             <type>zip</type>
             <classifier>ballerina-binary-repo</classifier>
