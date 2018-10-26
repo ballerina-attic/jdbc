@@ -20,8 +20,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <groupId>org.ballerinax.jdbc</groupId>
         <artifactId>jdbc-extension-parent</artifactId>
-        <groupId>io.ballerina</groupId>
         <version>0.982.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -184,7 +184,7 @@
                         <processor>org.ballerinalang.codegen.BallerinaAnnotationProcessor</processor>
                     </processors>
                     <options>
-                        <nativeEntityProviderPackage>org.ballerinalang.stdlib.jdbc.generated.providers</nativeEntityProviderPackage>
+                        <nativeEntityProviderPackage>org.ballerinax.jdbc.generated.providers</nativeEntityProviderPackage>
                         <nativeEntityProviderClass>StandardNativeElementProvider</nativeEntityProviderClass>
                     </options>
                 </configuration>

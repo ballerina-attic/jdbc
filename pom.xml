@@ -23,6 +23,7 @@
         <version>1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <groupId>org.ballerinax.jdbc</groupId>
     <artifactId>jdbc-extension-parent</artifactId>
     <packaging>pom</packaging>
     <name>Ballerina - jdbc</name>
