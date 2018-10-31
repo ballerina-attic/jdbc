@@ -103,9 +103,9 @@ This example demonstrates selecting data. First, a type is created to represent 
 ```ballerina
 // Define a type to represent the results set.
 type Student record {
-    int id,
-    string name,
-    int age,
+    int id;
+    string name;
+    int age;
 };
 
 // Select the data from the table.
