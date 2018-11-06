@@ -32,7 +32,7 @@
         <module>jdbc-extension</module>
         <module>jdbc-extension-test</module>
     </modules>
-    <version>0.982.1-SNAPSHOT</version>
+    <version>0.983.0</version>
 
     <dependencyManagement>
         <dependencies>
@@ -433,7 +433,7 @@
         <url>https://github.com/ballerinax/jdbc.git</url>
         <developerConnection>scm:git:https://github.com/ballerinax/jdbc.git</developerConnection>
         <connection>scm:git:https://github.com/ballerinax/jdbc.git</connection>
-        <tag>HEAD</tag>
+        <tag>v0.983.0</tag>
     </scm>
 
 
