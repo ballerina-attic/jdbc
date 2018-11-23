@@ -32,12 +32,12 @@ type ResultCustomers2 record {
 };
 
 function testSelectData(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
     string returnData = "";
     var x = testDB->select("SELECT Name from Customers where registrationID = 1", ());
     json j = getJsonConversionResult(x);
@@ -47,12 +47,12 @@ function testSelectData(string jdbcUrl, string userName, string password) return
 }
 
 function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     string ret = "";
     string[] generatedID = [];
@@ -70,12 +70,12 @@ function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string passwo
 }
 
 function testCallProcedure(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
     string returnData = "";
     var x = trap testDB->call("{call InsertPersonDataInfo(100,'James')}", ());
 
@@ -96,12 +96,12 @@ function testCallProcedure(string jdbcUrl, string userName, string password) ret
 }
 
 function testBatchUpdate(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     int[] updateCount = [];
     string returnVal = "";
@@ -138,12 +138,12 @@ function testBatchUpdate(string jdbcUrl, string userName, string password) retur
 }
 
 function testInvalidArrayofQueryParameters(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     string returnData = "";
     xml x1 = xml `<book>The Lost World</book>`;
@@ -168,12 +168,12 @@ function testInvalidArrayofQueryParameters(string jdbcUrl, string userName, stri
 
 function testCallProcedureWithMultipleResultSetsAndLowerConstraintCount(string jdbcUrl, string userName, string password
              ) returns ((string, string)|error?) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     var ret = testDB->call("{call SelectPersonDataMultiple()}", [ResultCustomers]);
     (string, string)|error|() retVal = ();
@@ -204,12 +204,12 @@ function testCallProcedureWithMultipleResultSetsAndLowerConstraintCount(string j
 
 function testCallProcedureWithMultipleResultSetsAndHigherConstraintCount(string jdbcUrl, string userName, string
     password) returns ((string, string)|error?) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     var ret = testDB->call("{call SelectPersonDataMultiple()}", [ResultCustomers, ResultCustomers2, Person]);
 
@@ -241,12 +241,12 @@ function testCallProcedureWithMultipleResultSetsAndHigherConstraintCount(string 
 
 function testCallProcedureWithMultipleResultSetsAndNilConstraintCount(string jdbcUrl, string userName, string password)
              returns (string|(string, string)|error?) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     var ret = testDB->call("{call SelectPersonDataMultiple()}", ());
     string|(string, string)|error|() retVal = ();
