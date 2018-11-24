@@ -87,12 +87,12 @@ type Employee record {
 };
 
 function testInsertTableData(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
     var result = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                          values ('James', 'Clerk', 3, 5000.75, 'USA')");
     int insertCount = getIntResult(result);
@@ -101,12 +101,12 @@ function testInsertTableData(string jdbcUrl, string userName, string password) r
 }
 
 function testCreateTable(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
     var result = testDB->update("CREATE TABLE IF NOT EXISTS Students(studentID int, LastName varchar(255))");
     int returnValue = getIntResult(result);
     testDB.stop();
@@ -114,12 +114,12 @@ function testCreateTable(string jdbcUrl, string userName, string password) retur
 }
 
 function testUpdateTableData(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     var result = testDB->update("Update Customers set country = 'UK' where registrationID = 1");
     int updateCount = getIntResult(result);
@@ -128,12 +128,12 @@ function testUpdateTableData(string jdbcUrl, string userName, string password) r
 }
 
 function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     string returnVal = "";
 
@@ -153,12 +153,12 @@ function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string passwo
 }
 
 function testGeneratedKeyOnInsertEmptyResults(string jdbcUrl, string userName, string password) returns (int|string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     int|string returnVal = "";
 
@@ -179,12 +179,12 @@ function testGeneratedKeyOnInsertEmptyResults(string jdbcUrl, string userName, s
 
 
 function testGeneratedKeyWithColumn(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     int insertCount;
     string[] generatedID;
@@ -214,12 +214,12 @@ function testGeneratedKeyWithColumn(string jdbcUrl, string userName, string pass
 }
 
 function testSelectData(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ResultCustomers);
     string firstName = getTableFirstNameColumn(dt);
     testDB.stop();
@@ -227,12 +227,12 @@ function testSelectData(string jdbcUrl, string userName, string password) return
 }
 
 function testSelectIntFloatData(string jdbcUrl, string userName, string password) returns (int, int, float, float) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     var dt = testDB->select("SELECT  int_type, long_type, float_type, double_type from DataTypeTable
         where row_id = 1", ResultDataType);
@@ -256,12 +256,12 @@ function testSelectIntFloatData(string jdbcUrl, string userName, string password
 }
 
 function testCallProcedure(string jdbcUrl, string userName, string password) returns (string, string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 2 }
-    };
+    });
 
     string returnValue = "";
     var ret = testDB->call("{call InsertPersonData(100,'James')}", ());
@@ -280,12 +280,12 @@ function testCallProcedure(string jdbcUrl, string userName, string password) ret
 }
 
 function testCallProcedureWithResultSet(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     string firstName = "";
     var ret = testDB->call("{call SelectPersonData()}", [ResultCustomers]);
@@ -299,33 +299,33 @@ function testCallProcedureWithResultSet(string jdbcUrl, string userName, string 
     return firstName;
 }
 
-function testCallFunctionWithReturningRefcursor(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
-        url: jdbcUrl,
-        username: userName,
-        password: password,
-        poolOptions: { maximumPoolSize: 1 }
-    };
-
-    sql:Parameter para1 = { sqlType: sql:TYPE_REFCURSOR, direction: sql:DIRECTION_OUT, recordType: ResultCustomers };
-
-    transaction {
-        var ret = testDB->call("{? = call SelectPersonData()}", [ResultCustomers], para1);
-    }
-    var dt = <table>para1.value;
-    string firstName = getTableFirstNameColumn(dt);
-    testDB.stop();
-    return firstName;
-}
+//function testCallFunctionWithReturningRefcursor(string jdbcUrl, string userName, string password) returns (string) {
+//    jdbc:Client testDB = new({
+//        url: jdbcUrl,
+//        username: userName,
+//        password: password,
+//        poolOptions: { maximumPoolSize: 1 }
+//    });
+//
+//    sql:Parameter para1 = { sqlType: sql:TYPE_REFCURSOR, direction: sql:DIRECTION_OUT, recordType: ResultCustomers };
+//
+//    transaction {
+//        var ret = testDB->call("{? = call SelectPersonData()}", [ResultCustomers], para1);
+//    }
+//    var dt = <table>para1.value;
+//    string firstName = getTableFirstNameColumn(dt);
+//    testDB.stop();
+//    return firstName;
+//}
 
 function testCallProcedureWithMultipleResultSets(string jdbcUrl, string userName, string password) returns (string,
             string, string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     string firstName1 = "";
     string firstName2 = "";
@@ -353,12 +353,12 @@ function testCallProcedureWithMultipleResultSets(string jdbcUrl, string userName
 }
 
 function testQueryParameters(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = ?", ResultCustomers, 1);
     string firstName = getTableFirstNameColumn(dt);
     testDB.stop();
@@ -366,12 +366,12 @@ function testQueryParameters(string jdbcUrl, string userName, string password) r
 }
 
 function testQueryParameters2(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter p1 = { sqlType: sql:TYPE_INTEGER, value: 1 };
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = ?", ResultCustomers, p1);
@@ -381,12 +381,12 @@ function testQueryParameters2(string jdbcUrl, string userName, string password) 
 }
 
 function testInsertTableDataWithParameters(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     string s1 = "Anne";
     sql:Parameter para1 = { sqlType: sql:TYPE_VARCHAR, value: s1, direction: sql:DIRECTION_IN };
@@ -403,12 +403,12 @@ function testInsertTableDataWithParameters(string jdbcUrl, string userName, stri
 }
 
 function testInsertTableDataWithParameters2(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     var result = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                      values (?,?,?,?,?)", "Anne", "James", 3, 5000.75, "UK");
@@ -418,12 +418,12 @@ function testInsertTableDataWithParameters2(string jdbcUrl, string userName, str
 }
 
 function testInsertTableDataWithParameters3(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     string s1 = "Anne";
     var result = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
@@ -434,12 +434,12 @@ function testInsertTableDataWithParameters3(string jdbcUrl, string userName, str
 }
 
 function testArrayofQueryParameters(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     int[] intDataArray = [1, 4343];
     string[] stringDataArray = ["A", "B"];
@@ -458,12 +458,12 @@ function testArrayofQueryParameters(string jdbcUrl, string userName, string pass
 }
 
 function testBoolArrayofQueryParameters(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     boolean accepted1 = false;
     boolean accepted2 = false;
@@ -491,12 +491,12 @@ function testBoolArrayofQueryParameters(string jdbcUrl, string userName, string 
 }
 
 function testBlobArrayQueryParameter(string jdbcUrl, string userName, string password) returns int {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     var dt1 = testDB->select("SELECT blob_type from BlobTable where row_id = 7", ResultBlob);
     byte[] blobData = [];
@@ -528,12 +528,12 @@ function testBlobArrayQueryParameter(string jdbcUrl, string userName, string pas
 
 function testArrayInParameters(string jdbcUrl, string userName, string password) returns (int, int[], int[], float[],
             string[], boolean[], float[]) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     int[] intArray = [1];
     int[] longArray = [1503383034226, 1503383034224, 1503383034225];
@@ -581,12 +581,12 @@ function testArrayInParameters(string jdbcUrl, string userName, string password)
 
 function testOutParameters(string jdbcUrl, string userName, string password) returns (any, any, any, any, any, any, any,
             any, any, any, any, any, any) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter paraID = { sqlType: sql:TYPE_INTEGER, value: "1" };
     sql:Parameter paraInt = { sqlType: sql:TYPE_INTEGER, direction: sql:DIRECTION_OUT };
@@ -627,12 +627,12 @@ function testOutParameters(string jdbcUrl, string userName, string password) ret
 }
 
 function testBlobOutInOutParameters(string jdbcUrl, string userName, string password) returns (any, any) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     // OUT param
     sql:Parameter paraID1 = { sqlType: sql:TYPE_INTEGER, value: "1" };
@@ -651,12 +651,12 @@ function testBlobOutInOutParameters(string jdbcUrl, string userName, string pass
 
 function testNullOutParameters(string jdbcUrl, string userName, string password) returns (any, any, any, any, any, any,
             any, any, any, any, any, any, any) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter paraID = { sqlType: sql:TYPE_INTEGER, value: "2" };
     sql:Parameter paraInt = { sqlType: sql:TYPE_INTEGER, direction: sql:DIRECTION_OUT };
@@ -695,12 +695,12 @@ function testNullOutParameters(string jdbcUrl, string userName, string password)
 }
 
 function testNullOutInOutBlobParameters(string jdbcUrl, string userName, string password) returns (any, any) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     // OUT params
     sql:Parameter paraID1 = { sqlType: sql:TYPE_INTEGER, value: "2" };
@@ -716,12 +716,12 @@ function testNullOutInOutBlobParameters(string jdbcUrl, string userName, string 
 }
 
 function testINParameters(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter paraID = { sqlType: sql:TYPE_INTEGER, value: 3 };
     sql:Parameter paraInt = { sqlType: sql:TYPE_INTEGER, value: 1 };
@@ -756,67 +756,67 @@ function testINParameters(string jdbcUrl, string userName, string password) retu
     return insertCount;
 }
 
-function testBlobInParameter(string jdbcUrl, string userName, string password) returns (int, byte[]) {
-    endpoint jdbc:Client testDB {
-        url: jdbcUrl,
-        username: userName,
-        password: password,
-        poolOptions: { maximumPoolSize: 1 }
-    };
-
-    sql:Parameter paraID = { sqlType: sql:TYPE_INTEGER, value: 3 };
-    sql:Parameter paraBlob = { sqlType: sql:TYPE_BLOB, value: "YmxvYiBkYXRh" };
-
-    byte[] blobVal = [];
-    int insertCount = -1;
-
-    if (jdbcUrl.contains("postgres")) {
-        // In postgresql large object operations should be done in transaction mode. This is enforced by the official
-        // driver. The reason is large objects could span cross multiple records.
-        transaction {
-            var ret = testDB->update("INSERT INTO BlobTable (row_id,blob_type) VALUES (?,?)",
-                paraID, paraBlob);
-            if (ret is int) {
-                insertCount = ret;
-            }
-            var dt = testDB->select("SELECT blob_type from BlobTable where row_id=3", ResultBlob);
-            if (dt is table) {
-                while (dt.hasNext()) {
-                    var rs = <ResultBlob>dt.getNext();
-                    if (rs is ResultBlob) {
-                        blobVal = rs.BLOB_TYPE;
-                    }
-                }
-            }
-        }
-    } else {
-        var ret1 = testDB->update("INSERT INTO BlobTable (row_id,blob_type) VALUES (?,?)",
-            paraID, paraBlob);
-        if (ret1 is int) {
-            insertCount = ret1;
-        }
-        var dt = testDB->select("SELECT blob_type from BlobTable where row_id=3", ResultBlob);
-        if (dt is table) {
-            while (dt.hasNext()) {
-                var rs = <ResultBlob>dt.getNext();
-                if (rs is ResultBlob) {
-                    blobVal = rs.BLOB_TYPE;
-                }
-            }
-        }
-    }
-    testDB.stop();
-    return (insertCount, blobVal);
-}
+//function testBlobInParameter(string jdbcUrl, string userName, string password) returns (int, byte[]) {
+//    jdbc:Client testDB = new({
+//        url: jdbcUrl,
+//        username: userName,
+//        password: password,
+//        poolOptions: { maximumPoolSize: 1 }
+//    });
+//
+//    sql:Parameter paraID = { sqlType: sql:TYPE_INTEGER, value: 3 };
+//    sql:Parameter paraBlob = { sqlType: sql:TYPE_BLOB, value: "YmxvYiBkYXRh" };
+//
+//    byte[] blobVal = [];
+//    int insertCount = -1;
+//
+//    if (jdbcUrl.contains("postgres")) {
+//        // In postgresql large object operations should be done in transaction mode. This is enforced by the official
+//        // driver. The reason is large objects could span cross multiple records.
+//        transaction {
+//            var ret = testDB->update("INSERT INTO BlobTable (row_id,blob_type) VALUES (?,?)",
+//                paraID, paraBlob);
+//            if (ret is int) {
+//                insertCount = ret;
+//            }
+//            var dt = testDB->select("SELECT blob_type from BlobTable where row_id=3", ResultBlob);
+//            if (dt is table) {
+//                while (dt.hasNext()) {
+//                    var rs = <ResultBlob>dt.getNext();
+//                    if (rs is ResultBlob) {
+//                        blobVal = rs.BLOB_TYPE;
+//                    }
+//                }
+//            }
+//        }
+//    } else {
+//        var ret1 = testDB->update("INSERT INTO BlobTable (row_id,blob_type) VALUES (?,?)",
+//            paraID, paraBlob);
+//        if (ret1 is int) {
+//            insertCount = ret1;
+//        }
+//        var dt = testDB->select("SELECT blob_type from BlobTable where row_id=3", ResultBlob);
+//        if (dt is table) {
+//            while (dt.hasNext()) {
+//                var rs = <ResultBlob>dt.getNext();
+//                if (rs is ResultBlob) {
+//                    blobVal = rs.BLOB_TYPE;
+//                }
+//            }
+//        }
+//    }
+//    testDB.stop();
+//    return (insertCount, blobVal);
+//}
 
 function testINParametersWithDirectValues(string jdbcUrl, string userName, string password) returns (int, int, float,
         float, boolean, string, float, float, float) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     var result = testDB->update("INSERT INTO DataTypeTable (row_id, int_type, long_type, float_type,
         double_type, boolean_type, string_type, numeric_type, decimal_type, real_type) VALUES (?,?,?,?,?,?,?,?,?,?)",
@@ -855,12 +855,12 @@ function testINParametersWithDirectValues(string jdbcUrl, string userName, strin
 
 function testINParametersWithDirectVariables(string jdbcUrl, string userName, string password) returns (int, int, float,
         float, boolean, string, float, float, float) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     int rowid = 26;
     int intType = 1;
@@ -911,12 +911,12 @@ function testINParametersWithDirectVariables(string jdbcUrl, string userName, st
 }
 
 function testNullINParameterValues(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter paraID = { sqlType: sql:TYPE_INTEGER, value: 4 };
     sql:Parameter paraInt = { sqlType: sql:TYPE_INTEGER, value: () };
@@ -944,12 +944,12 @@ function testNullINParameterValues(string jdbcUrl, string userName, string passw
 }
 
 function testNullINParameterBlobValue(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter paraID = { sqlType: sql:TYPE_INTEGER, value: 4 };
     sql:Parameter paraBlob = { sqlType: sql:TYPE_BLOB, value: () };
@@ -963,12 +963,12 @@ function testNullINParameterBlobValue(string jdbcUrl, string userName, string pa
 
 function testINOutParameters(string jdbcUrl, string userName, string password) returns (any, any, any, any, any, any,
             any, any, any, any, any, any, any) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter paraID = { sqlType: sql:TYPE_INTEGER, value: 5 };
     sql:Parameter paraInt = { sqlType: sql:TYPE_INTEGER, value: 10, direction: sql:DIRECTION_INOUT };
@@ -1009,12 +1009,12 @@ function testINOutParameters(string jdbcUrl, string userName, string password) r
 
 function testNullINOutParameters(string jdbcUrl, string userName, string password) returns (any, any, any, any, any, any
             , any, any, any, any, any, any, any) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter paraID = { sqlType: sql:TYPE_INTEGER, value: "6" };
     sql:Parameter paraInt = { sqlType: sql:TYPE_INTEGER, direction: sql:DIRECTION_INOUT };
@@ -1052,12 +1052,12 @@ function testNullINOutParameters(string jdbcUrl, string userName, string passwor
 }
 
 function testEmptySQLType(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
     var result = testDB->update("Insert into Customers (firstName) values (?)", "Anne");
     int insertCount = getIntResult(result);
     testDB.stop();
@@ -1066,12 +1066,12 @@ function testEmptySQLType(string jdbcUrl, string userName, string password) retu
 
 function testArrayOutParameters(string jdbcUrl, string userName, string password) returns (any, any, any, any, any, any)
 {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     string firstName;
     sql:Parameter para1 = { sqlType: sql:TYPE_ARRAY, direction: sql:DIRECTION_OUT };
@@ -1087,12 +1087,12 @@ function testArrayOutParameters(string jdbcUrl, string userName, string password
 
 function testArrayInOutParameters(string jdbcUrl, string userName, string password) returns (any, any, any, any, any,
             any, any) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     int[] intArray1 = [10,20,30];
     int[] intArray2 = [10000000, 20000000, 30000000];
@@ -1121,12 +1121,12 @@ function testArrayInOutParameters(string jdbcUrl, string userName, string passwo
 }
 
 function testBatchUpdate(string jdbcUrl, string userName, string password) returns (int[]) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     //Batch 1
     sql:Parameter para1 = { sqlType: sql:TYPE_VARCHAR, value: "Alex" };
@@ -1154,12 +1154,12 @@ function testBatchUpdate(string jdbcUrl, string userName, string password) retur
 type myBatchType string|int|float;
 
 function testBatchUpdateWithValues(string jdbcUrl, string userName, string password) returns int[] {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     //Batch 1
     myBatchType[] parameters1 = ["Alex", "Smith", 20, 3400.5, "Colombo"];
@@ -1175,12 +1175,12 @@ function testBatchUpdateWithValues(string jdbcUrl, string userName, string passw
 }
 
 function testBatchUpdateWithVariables(string jdbcUrl, string userName, string password) returns int[] {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     //Batch 1
     string firstName1 = "Alex";
@@ -1202,12 +1202,12 @@ function testBatchUpdateWithVariables(string jdbcUrl, string userName, string pa
 }
 
 function testBatchUpdateWithFailure(string jdbcUrl, string userName, string password) returns (int[], int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     //Batch 1
     sql:Parameter para0 = { sqlType: sql:TYPE_INTEGER, value: 111 };
@@ -1256,12 +1256,12 @@ function testBatchUpdateWithFailure(string jdbcUrl, string userName, string pass
 }
 
 function testBatchUpdateWithNullParam(string jdbcUrl, string userName, string password) returns (int[]) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     var ret = testDB->batchUpdate("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                      values ('Alex','Smith',20,3400.5,'Colombo')");
@@ -1271,12 +1271,12 @@ function testBatchUpdateWithNullParam(string jdbcUrl, string userName, string pa
 }
 
 function testDateTimeInParameters(string jdbcUrl, string userName, string password) returns (int[]) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     string stmt =
     "Insert into DateTimeTypes(row_id,date_type,time_type,datetime_type,timestamp_type) values (?,?,?,?,?)";
@@ -1319,12 +1319,12 @@ function testDateTimeInParameters(string jdbcUrl, string userName, string passwo
 }
 
 function testDateTimeNullInValues(string jdbcUrl, string userName, string password) returns (string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter para0 = { sqlType: sql:TYPE_INTEGER, value: 33 };
     sql:Parameter para1 = { sqlType: sql:TYPE_DATE, value: () };
@@ -1345,12 +1345,12 @@ function testDateTimeNullInValues(string jdbcUrl, string userName, string passwo
 }
 
 function testDateTimeNullOutValues(string jdbcUrl, string userName, string password) returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter para1 = { sqlType: sql:TYPE_INTEGER, value: 123 };
     sql:Parameter para2 = { sqlType: sql:TYPE_DATE, value: () };
@@ -1373,12 +1373,12 @@ function testDateTimeNullOutValues(string jdbcUrl, string userName, string passw
 }
 
 function testDateTimeNullInOutValues(string jdbcUrl, string userName, string password) returns (any, any, any, any) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter para1 = { sqlType: sql:TYPE_INTEGER, value: 124 };
     sql:Parameter para2 = { sqlType: sql:TYPE_DATE, value: null, direction: sql:DIRECTION_INOUT };
@@ -1393,12 +1393,12 @@ function testDateTimeNullInOutValues(string jdbcUrl, string userName, string pas
 
 function testDateTimeOutParams(int time, int date, int timestamp, string jdbcUrl, string userName, string password)
              returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter para1 = { sqlType: sql:TYPE_INTEGER, value: 10 };
     sql:Parameter para2 = { sqlType: sql:TYPE_DATE, value: date };
@@ -1423,12 +1423,12 @@ function testDateTimeOutParams(int time, int date, int timestamp, string jdbcUrl
 }
 
 function testStructOutParameters(string jdbcUrl, string userName, string password) returns (any) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     sql:Parameter para1 = { sqlType: sql:TYPE_STRUCT, direction: sql:DIRECTION_OUT };
     _ = testDB->call("{call TestStructOut(?)}", (), para1);
@@ -1438,12 +1438,12 @@ function testStructOutParameters(string jdbcUrl, string userName, string passwor
 
 function testComplexTypeRetrieval(string jdbcUrl, string userName, string password) returns (string, string, string,
             string) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     string s1;
     string s2;
@@ -1472,12 +1472,12 @@ function testComplexTypeRetrieval(string jdbcUrl, string userName, string passwo
 
 function testSelectLoadToMemory(string jdbcUrl, string userName, string password) returns (CustomerFullName[],
             CustomerFullName[], CustomerFullName[]) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     var dt = testDB->select(
         "SELECT firstName, lastName from Customers where registrationID < 3", CustomerFullName , loadToMemory = true);
@@ -1509,12 +1509,12 @@ function testSelectLoadToMemory(string jdbcUrl, string userName, string password
 
 function testLoadToMemorySelectAfterTableClose(string jdbcUrl, string userName, string password) returns (
             CustomerFullName[], CustomerFullName[], error?) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
 
     var dt = testDB->select(
         "SELECT firstName, lastName from Customers where registrationID < 3", CustomerFullName, loadToMemory = true);
@@ -1552,37 +1552,13 @@ function iterateTableAndReturnResultArray(table<CustomerFullName> dt) returns Cu
 
 function testCloseConnectionPool(string jdbcUrl, string userName, string password, string connectionCountQuery)
              returns (int) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
         password: password,
         poolOptions: { maximumPoolSize: 1 }
-    };
+    });
     var dt = testDB->select(connectionCountQuery, ResultCount);
-    int count = getTableCountValColumn(dt);
-    testDB.stop();
-    return count;
-}
-
-function testReInitEndpoint(string jdbcUrl, string userName, string password, string jdbcurl2, string validationQuery)
-             returns int {
-    endpoint jdbc:Client testDB {
-        url: jdbcUrl,
-        username: userName,
-        password: password,
-        poolOptions: { maximumPoolSize: 1 }
-    };
-
-    testDB.stop();
-
-    jdbc:ClientEndpointConfiguration config = {
-        url: jdbcurl2,
-        username: userName,
-        password: password,
-        poolOptions: { maximumPoolSize: 1 }
-    };
-    testDB.init(config);
-    var dt = testDB->select(validationQuery, ResultCount);
     int count = getTableCountValColumn(dt);
     testDB.stop();
     return count;

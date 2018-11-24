@@ -33,12 +33,12 @@ map propertiesMap3 = { "url": "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECT
 sql:PoolOptions properties6 = { dataSourceClassName: "org.hsqldb.jdbc.JDBCDataSource" };
 
 function testConnectionPoolProperties1() returns (json) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT",
         username: "SA",
         password: "",
         poolOptions: properties
-    };
+    });
 
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
@@ -48,12 +48,11 @@ function testConnectionPoolProperties1() returns (json) {
 }
 
 function testConnectionPoolProperties2() returns (json) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT",
         username: "SA",
         poolOptions: properties
-    };
-
+    });
 
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
@@ -63,10 +62,10 @@ function testConnectionPoolProperties2() returns (json) {
 }
 
 function testConnectionPoolProperties3() returns (json) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT",
         username: "SA"
-    };
+    });
 
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
@@ -77,11 +76,11 @@ function testConnectionPoolProperties3() returns (json) {
 
 
 function testConnectorWithDefaultPropertiesForListedDB() returns (json) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT",
         username: "SA",
         poolOptions: {}
-    };
+    });
 
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
@@ -91,11 +90,11 @@ function testConnectorWithDefaultPropertiesForListedDB() returns (json) {
 }
 
 function testConnectorWithWorkers() returns (json) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT",
         username: "SA",
         poolOptions: {}
-    };
+    });
 
     worker w1 {
         int x = 0;
@@ -113,12 +112,12 @@ function testConnectorWithWorkers() returns (json) {
 }
 
 function testConnectorWithDataSourceClass() returns (json) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT",
         username: "SA",
         poolOptions: properties3,
         dbOptions: propertiesMap
-    };
+    });
 
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
@@ -128,13 +127,13 @@ function testConnectorWithDataSourceClass() returns (json) {
 }
 
 function testConnectorWithDataSourceClassAndProps() returns (json) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT",
         username: "SA",
         password: "",
         poolOptions: properties4,
         dbOptions: propertiesMap2
-    };
+    });
 
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
@@ -144,12 +143,12 @@ function testConnectorWithDataSourceClassAndProps() returns (json) {
 }
 
 function testConnectorWithDataSourceClassWithoutURL() returns (json) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT",
         username: "SA",
         password: "",
         poolOptions: properties5
-    };
+    });
 
 
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
@@ -160,13 +159,13 @@ function testConnectorWithDataSourceClassWithoutURL() returns (json) {
 }
 
 function testConnectorWithDataSourceClassURLPriority() returns (json) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT",
         username: "SA",
         password: "",
         poolOptions: properties6,
         dbOptions: propertiesMap3
-    };
+    });
 
 
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
@@ -178,13 +177,13 @@ function testConnectorWithDataSourceClassURLPriority() returns (json) {
 
 
 function testPropertiesGetUsedOnlyIfDataSourceGiven() returns (json) {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT",
         username: "SA",
         password: "",
         poolOptions: { maximumPoolSize: 1 },
         dbOptions: { "invalidProperty": 109 }
-    };
+    });
 
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
@@ -194,13 +193,13 @@ function testPropertiesGetUsedOnlyIfDataSourceGiven() returns (json) {
 }
 
 function testConnectionFailure() {
-    endpoint jdbc:Client testDB {
+    jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/NON_EXISTING_DB",
         username: "SA",
         password: "",
         poolOptions: { maximumPoolSize: 1 },
         dbOptions: { "ifexists": true }
-    };
+    });
 
 }
 
