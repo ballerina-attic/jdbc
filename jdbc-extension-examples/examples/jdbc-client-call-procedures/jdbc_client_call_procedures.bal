@@ -4,13 +4,13 @@ import ballerinax/jdbc;
 
 // Client endpoint for MySQL database. This client endpoint can be used with any jdbc
 // supported database by providing the corresponding jdbc url.
-endpoint jdbc:Client testDB {
-    url: "jdbc:mysql://localhost:3306/testdb",
-    username: "test",
-    password: "test",
-    poolOptions: { maximumPoolSize: 5 },
-    dbOptions: { useSSL: false }
-};
+jdbc:Client testDB = new({
+        url: "jdbc:mysql://localhost:3306/testdb",
+        username: "test",
+        password: "test",
+        poolOptions: { maximumPoolSize: 5 },
+        dbOptions: { useSSL: false }
+    });
 
 // This is the type created to represent data row.
 type Student record {
@@ -51,10 +51,11 @@ public function main() {
     io:println("\nThe call operation - With IN params");
     // Invoke the stored procedure with IN type parameters.
     var retCall = testDB->call("{CALL INSERTDATA(?,?)}", (), 20, "George");
-    match retCall {
-        ()|table[] => io:println("Call operation with IN params successful");
-        error e => io:println("Stored procedure call failed: "
-                + e.message);
+    if (retCall is ()|table<record {}>[]) {
+        io:println("Call operation with IN params successful");
+    } else if (retCall is error) {
+        io:println("Stored procedure call failed: "
+                + <string>retCall.detail().message);
     }
 
     // Here stored procedure with OUT and INOUT parameters is invoked.
@@ -65,16 +66,15 @@ public function main() {
     sql:Parameter param2 = { sqlType: sql:TYPE_INTEGER,
         direction: sql:DIRECTION_OUT };
     retCall = testDB->call("{CALL GETCOUNT(?,?)}", (), param1, param2);
-    match retCall {
-        ()|table[] => {
-            io:println("Call operation with INOUT and OUT params successful");
-            io:print("Student ID of the student with age = 20: ");
-            io:println(param1.value);
-            io:print("Student count with age = 20: ");
-            io:println(param2.value);
-        }
-        error e => io:println("Stored procedure call failed: "
-                + e.message);
+    if (retCall is ()|table<record {}>[]) {
+        io:println("Call operation with INOUT and OUT params successful");
+        io:print("Student ID of the student with age = 20: ");
+        io:println(param1.value);
+        io:print("Student count with age = 20: ");
+        io:println(param2.value);
+    } else if (retCall is error) {
+        io:println("Stored procedure call failed: "
+                + <string>retCall.detail().message);
     }
 
     checkData();
@@ -93,9 +93,10 @@ public function main() {
 
 // Function to handle return of the update operation.
 function handleUpdate(int|error returned, string message) {
-    match returned {
-        int retInt => io:println(message + " status: " + retInt);
-        error e => io:println(message + " failed: " + e.message);
+    if (returned is int) {
+        io:println(message + " status: " + returned);
+    } else if (returned is error) {
+        io:println(message + " failed: " + <string>returned.detail().message);
     }
 }
 
@@ -103,16 +104,14 @@ function handleUpdate(int|error returned, string message) {
 function checkData() {
     var dtReturned = testDB->select("SELECT * FROM student", Student);
 
-    table<Student> dt;
-    match dtReturned {
-        table tableReturned => dt = tableReturned;
-        error e => io:println("Select data from student table failed: "
-                + e.message);
-    }
-
-    // Iterating data.
-    io:println("Data in students table:");
-    foreach row in dt {
-        io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
+    if (dtReturned is table<Student>) {
+        // Iterating data.
+        io:println("Data in students table:");
+        foreach row in dtReturned {
+            io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
+        }
+    } else if (dtReturned is error) {
+        io:println("Select data from student table failed: "
+                + <string>dtReturned.detail().message);
     }
 }
