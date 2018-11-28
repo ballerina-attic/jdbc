@@ -79,8 +79,8 @@ function testCallProcedure(string jdbcUrl, string userName, string password) ret
     string returnData = "";
     var x = trap testDB->call("{call InsertPersonDataInfo(100,'James')}", ());
 
-    if (x is table[]) {
-        var j = <json>x[0];
+    if (x is table<record {}>[]) {
+        var j = json.create(x[0]);
         if (j is json) {
             returnData = io:sprintf("%s", j);
         } else if (j is error) {
@@ -152,8 +152,8 @@ function testInvalidArrayofQueryParameters(string jdbcUrl, string userName, stri
     sql:Parameter para0 = { sqlType: sql:TYPE_INTEGER, value: xmlDataArray };
     var x = trap testDB->select("SELECT FirstName from Customers where registrationID in (?)", (), para0);
 
-    if (x is table) {
-        var j = <json>x;
+    if (x is table<record {}>) {
+        var j = json.create(x);
         if (j is json) {
             returnData = io:sprintf("%s", j);
         } else {
@@ -177,17 +177,17 @@ function testCallProcedureWithMultipleResultSetsAndLowerConstraintCount(string j
 
     var ret = testDB->call("{call SelectPersonDataMultiple()}", [ResultCustomers]);
     (string, string)|error|() retVal = ();
-    if (ret is table[]) {
+    if (ret is table<record {}>[]) {
         string firstName1 = "";
         string firstName2 = "";
         while (ret[0].hasNext()) {
-            var rs = <ResultCustomers>ret[0].getNext();
+            var rs = ret[0].getNext();
             if (rs is ResultCustomers) {
                 firstName1 = rs.FIRSTNAME;
             }
         }
         while (ret[1].hasNext()) {
-            var rs = <ResultCustomers>ret[1].getNext();
+            var rs = ret[1].getNext();
             if (rs is ResultCustomers) {
                 firstName2 = rs.FIRSTNAME;
             }
@@ -214,17 +214,17 @@ function testCallProcedureWithMultipleResultSetsAndHigherConstraintCount(string 
     var ret = testDB->call("{call SelectPersonDataMultiple()}", [ResultCustomers, ResultCustomers2, Person]);
 
     (string, string)|error|() retVal = ();
-    if (ret is table[]) {
+    if (ret is table<record {}>[]) {
         string firstName1 = "";
         string firstName2 = "";
         while (ret[0].hasNext()) {
-            var rs = <ResultCustomers>ret[0].getNext();
+            var rs = ret[0].getNext();
             if (rs is ResultCustomers) {
                 firstName1 = rs.FIRSTNAME;
             }
         }
         while (ret[1].hasNext()) {
-            var rs = <ResultCustomers>ret[1].getNext();
+            var rs = ret[1].getNext();
             if (rs is ResultCustomers) {
                 firstName2 = rs.FIRSTNAME;
             }
@@ -250,17 +250,17 @@ function testCallProcedureWithMultipleResultSetsAndNilConstraintCount(string jdb
 
     var ret = testDB->call("{call SelectPersonDataMultiple()}", ());
     string|(string, string)|error|() retVal = ();
-    if (ret is table[]) {
+    if (ret is table<record {}>[]) {
         string firstName1 = "";
         string firstName2 = "";
         while (ret[0].hasNext()) {
-            var rs = <ResultCustomers>ret[0].getNext();
+            var rs = ret[0].getNext();
             if (rs is ResultCustomers) {
                 firstName1 = rs.FIRSTNAME;
             }
         }
         while (ret[1].hasNext()) {
-            var rs = <ResultCustomers>ret[1].getNext();
+            var rs = ret[1].getNext();
             if (rs is ResultCustomers) {
                 firstName2 = rs.FIRSTNAME;
             }
@@ -275,10 +275,10 @@ function testCallProcedureWithMultipleResultSetsAndNilConstraintCount(string jdb
     return retVal;
 }
 
-function getJsonConversionResult(table|error tableOrError) returns json {
+function getJsonConversionResult(table<record {}>|error tableOrError) returns json {
     json retVal = {};
-    if (tableOrError is table) {
-        var jsonConversionResult = <json>tableOrError;
+    if (tableOrError is table<record {}>) {
+        var jsonConversionResult = json.create(tableOrError);
         if (jsonConversionResult is json) {
             retVal = jsonConversionResult;
         } else if (jsonConversionResult is error) {

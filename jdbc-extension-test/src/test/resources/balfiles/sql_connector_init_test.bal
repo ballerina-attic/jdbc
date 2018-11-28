@@ -21,15 +21,15 @@ sql:PoolOptions properties = { maximumPoolSize: 1,
     minimumIdle: 1, validationTimeout: 5000,
     connectionInitSql: "SELECT 1 FROM INFORMATION_SCHEMA.SYSTEM_USERS" };
 
-map propertiesMap = { "loginTimeout": 109 };
+map<any> propertiesMap = { "loginTimeout": 109 };
 sql:PoolOptions properties3 = { dataSourceClassName: "org.hsqldb.jdbc.JDBCDataSource" };
 
-map propertiesMap2 = { "loginTimeout": 109 };
+map<any> propertiesMap2 = { "loginTimeout": 109 };
 sql:PoolOptions properties4 = { dataSourceClassName: "org.hsqldb.jdbc.JDBCDataSource" };
 
 sql:PoolOptions properties5 = { dataSourceClassName: "org.hsqldb.jdbc.JDBCDataSource" };
 
-map propertiesMap3 = { "url": "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT" };
+map<any> propertiesMap3 = { "url": "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_INIT" };
 sql:PoolOptions properties6 = { dataSourceClassName: "org.hsqldb.jdbc.JDBCDataSource" };
 
 function testConnectionPoolProperties1() returns (json) {
@@ -203,10 +203,10 @@ function testConnectionFailure() {
 
 }
 
-function getJsonConversionResult(table|error tableOrError) returns json {
+function getJsonConversionResult(table<record {}>|error tableOrError) returns json {
     json retVal = {};
-    if (tableOrError is table) {
-        var jsonConversionResult = <json>tableOrError;
+    if (tableOrError is table<record {}>) {
+        var jsonConversionResult = json.create(tableOrError);
         if (jsonConversionResult is json) {
             retVal = jsonConversionResult;
         } else if (jsonConversionResult is error) {
