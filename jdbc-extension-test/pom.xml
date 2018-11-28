@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jdbc-extension-test</artifactId>
-
+    <name>Ballerinax - JDBC Extension Tests</name>
     <build>
         <plugins>
             <plugin>
