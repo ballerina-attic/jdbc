@@ -188,7 +188,7 @@ public class SQLActionsTest {
         Assert.assertEquals(returns[1].stringValue(), "nil");
     }
 
-    @Test(groups = {CONNECTOR_TEST, MYSQL_NOT_SUPPORTED, POSTGRES_NOT_SUPPORTED, H2_NOT_SUPPORTED})
+    @Test(groups = {CONNECTOR_TEST, POSTGRES_NOT_SUPPORTED, H2_NOT_SUPPORTED})
     public void testCallProcedureWithResultSet() {
         BValue[] returns = BRunUtil.invokeFunction(result, "testCallProcedureWithResultSet", connectionArgs);
         BString retValue = (BString) returns[0];
