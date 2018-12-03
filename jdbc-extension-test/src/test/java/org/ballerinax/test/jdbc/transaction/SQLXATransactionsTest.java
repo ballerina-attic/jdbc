@@ -63,13 +63,6 @@ public class SQLXATransactionsTest {
     }
 
     @Test
-    public void testXATransactonSuccessWithH2Client() {
-        BValue[] returns = BRunUtil.invoke(result, "testXATransactonSuccessWithH2Client");
-        Assert.assertEquals(((BInteger) returns[0]).intValue(), 1);
-        Assert.assertEquals(((BInteger) returns[1]).intValue(), 1);
-    }
-
-    @Test
     public void testXATransactonFailed1() {
         BValue[] returns = BRunUtil.invoke(result, "testXATransactonFailed1");
         Assert.assertEquals(((BInteger) returns[0]).intValue(), 0);

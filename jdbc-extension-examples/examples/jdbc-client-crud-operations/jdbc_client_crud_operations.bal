@@ -4,13 +4,13 @@ import ballerinax/jdbc;
 
 // Client endpoint for MySQL database. This client endpoint can be used with any jdbc
 // supported database by providing the corresponding jdbc url.
-endpoint jdbc:Client testDB {
-    url: "jdbc:mysql://localhost:3306/testdb",
-    username: "test",
-    password: "test",
-    poolOptions: { maximumPoolSize: 5 },
-    dbOptions: { useSSL: false }
-};
+jdbc:Client testDB = new({
+        url: "jdbc:mysql://localhost:3306/testdb",
+        username: "test",
+        password: "test",
+        poolOptions: { maximumPoolSize: 5 },
+        dbOptions: { useSSL: false }
+    });
 
 // This is the type created to represent data row.
 type Student record {
@@ -74,13 +74,12 @@ public function main() {
     name = "Kate";
     var retWithKey = testDB->updateWithGeneratedKeys("INSERT INTO student
                         (age, name) values (?, ?)", (), age, name);
-    match retWithKey {
-        (int, string[]) y => {
-            var (count, ids) = y;
-            io:println("Inserted row count: " + count);
-            io:println("Generated key: " + ids[0]);
-        }
-        error e => io:println("Insert to table failed: " + e.message);
+    if (retWithKey is (int, string[])) {
+        var (count, ids) = retWithKey;
+        io:println("Inserted row count: " + count);
+        io:println("Generated key: " + ids[0]);
+    } else if (retWithKey is error) {
+        io:println("Insert to table failed: " + <string>retWithKey.detail().message);
     }
 
     // Select data using the `select` operation. The `select` operation returns a table.
@@ -88,24 +87,23 @@ public function main() {
     io:println("\nThe select operation - Select data from a table");
     var selectRet = testDB->select("SELECT * FROM student", Student);
     table<Student> dt;
-    match selectRet {
-        table tableReturned => dt = tableReturned;
-        error e => io:println("Select data from student table failed: "
-                + e.message);
-    }
-    // Conversion from type 'table' to either JSON or XML results in data streaming.
-    // When a service client makes a request, the result is streamed to the service
-    // client rather than building the full result in the server and returning it.
-    // This allows unlimited payload sizes in the result and the response is
-    // instantaneous to the client.
-    // Convert a table to JSON.
-    var jsonConversionRet = <json>dt;
-    match jsonConversionRet {
-        json jsonRes => {
+    if (selectRet is table<Student>) {
+        // Conversion from type 'table' to either JSON or XML results in data streaming.
+        // When a service client makes a request, the result is streamed to the service
+        // client rather than building the full result in the server and returning it.
+        // This allows unlimited payload sizes in the result and the response is
+        // instantaneous to the client.
+        // Convert a table to JSON.
+        var jsonConversionRet = json.create(selectRet);
+        if (jsonConversionRet is json) {
             io:print("JSON: ");
-            io:println(io:sprintf("%s", jsonRes));
+            io:println(io:sprintf("%s", jsonConversionRet));
+        } else {
+            io:println("Error in table to json conversion");
         }
-        error e => io:println("Error in table to json conversion");
+    } else if (selectRet is error) {
+        io:println("Select data from student table failed: "
+                + <string>selectRet.detail().message);
     }
 
     // Re-iteration of the result is possible only if `loadToMemory` named argument
@@ -113,23 +111,21 @@ public function main() {
     io:println("\nThe select operation - By loading table to memory");
     selectRet = testDB->select("SELECT * FROM student", Student,
         loadToMemory = true);
-    match selectRet {
-        table tableReturned => dt = tableReturned;
-        error e => io:println("Select data from student table failed: "
-                + e.message);
+    if (selectRet is table<Student>) {
+        // Iterating data first time.
+        io:println("Iterating data first time:");
+        foreach row in selectRet {
+            io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
+        }
+        // Iterating data second time.
+        io:println("Iterating data second time:");
+        foreach row in selectRet {
+            io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
+        }
+    } else if (selectRet is error) {
+        io:println("Select data from student table failed: "
+                + <string>selectRet.detail().message);
     }
-
-    // Iterating data first time.
-    io:println("Iterating data first time:");
-    foreach row in dt {
-        io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
-    }
-    // Iterating data second time.
-    io:println("Iterating data second time:");
-    foreach row in dt {
-        io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
-    }
-
     //Drop the table and procedures.
     io:println("\nThe update operation - Drop the student table");
     ret = testDB->update("DROP TABLE student");
@@ -138,8 +134,9 @@ public function main() {
 
 // Function to handle return of the update operation.
 function handleUpdate(int|error returned, string message) {
-    match returned {
-        int retInt => io:println(message + " status: " + retInt);
-        error e => io:println(message + " failed: " + e.message);
+    if (returned is int) {
+        io:println(message + " status: " + returned);
+    } else if (returned is error) {
+        io:println(message + " failed: " + <string>returned.detail().message);
     }
 }
