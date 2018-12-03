@@ -96,7 +96,7 @@ function testConnectorWithWorkers() returns (json) {
         poolOptions: {}
     });
 
-    worker w1 {
+    worker w1 returns json {
         int x = 0;
         json y;
 
@@ -109,6 +109,7 @@ function testConnectorWithWorkers() returns (json) {
     worker w2 {
         int x = 10;
     }
+    return wait w1;
 }
 
 function testConnectorWithDataSourceClass() returns (json) {

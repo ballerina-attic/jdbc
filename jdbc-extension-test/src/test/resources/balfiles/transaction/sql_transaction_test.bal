@@ -17,12 +17,13 @@ import ballerinax/jdbc;
 import ballerina/io;
 import ballerina/runtime;
 import ballerina/sql;
+import ballerina/transactions;
 
 type ResultCount record {
     int COUNTVAL;
 };
 
-function testLocalTransaction() returns (int, int) {
+function testLocalTransaction() returns (int, int, boolean, boolean) {
     jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_TR",
         username: "SA",
@@ -31,6 +32,8 @@ function testLocalTransaction() returns (int, int) {
 
     int returnVal = 0;
     int count;
+    boolean committedBlockExecuted = false;
+    boolean abortedBlockExecuted = false;
     transaction {
         _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                 values ('James', 'Clerk', 200, 5000.75, 'USA')");
@@ -38,16 +41,20 @@ function testLocalTransaction() returns (int, int) {
                                 values ('James', 'Clerk', 200, 5000.75, 'USA')");
     } onretry {
         returnVal = -1;
+    } committed {
+        committedBlockExecuted = true;
+    } aborted {
+        abortedBlockExecuted = true;
     }
     //check whether update action is performed
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 200", ResultCount
     );
     count = getTableCountValColumn(dt);
     testDB.stop();
-    return (returnVal, count);
+    return (returnVal, count, committedBlockExecuted, abortedBlockExecuted);
 }
 
-function testTransactionRollback() returns (int, int) {
+function testTransactionRollback() returns (int, int, boolean) {
     jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_TR",
         username: "SA",
@@ -56,13 +63,14 @@ function testTransactionRollback() returns (int, int) {
 
     int returnVal = 0;
     int count;
+    boolean stmtAfterFailureExecuted = false;
 
     transaction {
         _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,
                 creditLimit,country) values ('James', 'Clerk', 210, 5000.75, 'USA')");
         _ = testDB->update("Insert into Customers2 (firstName,lastName,registrationID,
                 creditLimit,country) values ('James', 'Clerk', 210, 5000.75, 'USA')");
-
+        stmtAfterFailureExecuted = true;
     } onretry {
         returnVal = -1;
     }
@@ -71,7 +79,7 @@ function testTransactionRollback() returns (int, int) {
     );
     count = getTableCountValColumn(dt);
     testDB.stop();
-    return (returnVal, count);
+    return (returnVal, count, stmtAfterFailureExecuted);
 }
 
 function testLocalTransactionUpdateWithGeneratedKeys() returns (int, int) {
@@ -298,6 +306,7 @@ function testTransactionAbort() returns (int, int) {
     return (returnVal, count);
 }
 
+int testTransactionErrorPanicRetVal = 0;
 function testTransactionErrorPanic() returns (int, int, int) {
     jdbc:Client testDB = new({
         url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_TR",
@@ -309,9 +318,7 @@ function testTransactionErrorPanic() returns (int, int, int) {
     int catchValue = 0;
     int count;
     var ret = trap testTransactionErrorPanicHelper(testDB);
-    if (ret is int) {
-        returnVal = ret;
-    } else if (ret is error) {
+    if (ret is error) {
         catchValue = -1;
     }
     //check whether update action is performed
@@ -319,10 +326,10 @@ function testTransactionErrorPanic() returns (int, int, int) {
     );
     count = getTableCountValColumn(dt);
     testDB.stop();
-    return (returnVal, catchValue, count);
+    return (testTransactionErrorPanicRetVal, catchValue, count);
 }
 
-function testTransactionErrorPanicHelper(jdbc:Client testDB) returns int {
+function testTransactionErrorPanicHelper(jdbc:Client testDB) {
     int returnVal = 0;
     transaction {
         _ = testDB->update("Insert into Customers (firstName,lastName,
@@ -333,9 +340,8 @@ function testTransactionErrorPanicHelper(jdbc:Client testDB) returns int {
             panic e;
         }
     } onretry {
-        returnVal = -1;
+        testTransactionErrorPanicRetVal = -1;
     }
-    return returnVal;
 }
 
 function testTransactionErrorPanicAndTrap() returns (int, int, int) {
@@ -488,7 +494,9 @@ function testLocalTransactionFailedHelper(string status, jdbc:Client testDB) ret
         _ = testDB->update("Insert into Customers2 (firstName,lastName,registrationID,creditLimit,country)
                         values ('Anne', 'Clerk', 111, 5000.75, 'USA')");
     } onretry {
-        a = a + " inFld";
+        a = a + " onRetry";
+    } aborted {
+        a = a + " trxAborted";
     }
     return a;
 }
@@ -530,8 +538,10 @@ function testLocalTransactionSuccessWithFailedHelper(string status, jdbc:Client 
                                         values ('Anne', 'Clerk', 222, 5000.75, 'USA')");
         }
     } onretry {
-        a = a + " inFld";
+        a = a + " onRetry";
         i = i + 1;
+    } committed {
+        a = a + " committed";
     }
     return a;
 }
@@ -586,10 +596,7 @@ function testNestedTwoLevelTransactionSuccess() returns (int, int) {
     transaction {
         _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                 values ('James', 'Clerk', 333, 5000.75, 'USA')");
-        transaction {
-            _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
-                                values ('James', 'Clerk', 333, 5000.75, 'USA')");
-        }
+        testNestedTwoLevelTransactionSuccessParticipant(testDB);
     } onretry {
         returnVal = -1;
     }
@@ -599,6 +606,12 @@ function testNestedTwoLevelTransactionSuccess() returns (int, int) {
     count = getTableCountValColumn(dt);
     testDB.stop();
     return (returnVal, count);
+}
+
+@transactions:Participant {}
+function testNestedTwoLevelTransactionSuccessParticipant(jdbc:Client testDB) {
+    _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
+                                values ('James', 'Clerk', 333, 5000.75, 'USA')");
 }
 
 function testNestedThreeLevelTransactionSuccess() returns (int, int) {
@@ -613,14 +626,7 @@ function testNestedThreeLevelTransactionSuccess() returns (int, int) {
     transaction {
         _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                 values ('James', 'Clerk', 444, 5000.75, 'USA')");
-        transaction {
-            _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
-                                values ('James', 'Clerk', 444, 5000.75, 'USA')");
-            transaction {
-                _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
-                                values ('James', 'Clerk', 444, 5000.75, 'USA')");
-            }
-        }
+        testNestedThreeLevelTransactionSuccessParticipant1(testDB);
     } onretry {
         returnVal = -1;
     }
@@ -630,6 +636,19 @@ function testNestedThreeLevelTransactionSuccess() returns (int, int) {
     count = getTableCountValColumn(dt);
     testDB.stop();
     return (returnVal, count);
+}
+
+@transactions:Participant {}
+function testNestedThreeLevelTransactionSuccessParticipant1(jdbc:Client testDB) {
+    _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
+                                values ('James', 'Clerk', 444, 5000.75, 'USA')");
+    testNestedThreeLevelTransactionSuccessParticipant2(testDB);
+}
+
+@transactions:Participant {}
+function testNestedThreeLevelTransactionSuccessParticipant2(jdbc:Client testDB) {
+    _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
+                                values ('James', 'Clerk', 444, 5000.75, 'USA')");
 }
 
 function testNestedThreeLevelTransactionFailed() returns (int, int) {
@@ -658,75 +677,31 @@ function testNestedThreeLevelTransactionFailedHelper(jdbc:Client testDB) returns
     transaction {
         _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                         values ('James', 'Clerk', 555, 5000.75, 'USA')");
-        transaction {
-            _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
-                                            values ('James', 'Clerk', 555, 5000.75, 'USA')");
-            transaction {
-            _ = testDB->update("Insert into Customers (invalidColumn,lastName,registrationID,creditLimit,country)
-                                            values ('James', 'Clerk', 555, 5000.75, 'USA')");
-            }
-        }
+        testNestedThreeLevelTransactionFailedHelperParticipant1(testDB);
     } onretry {
         returnVal = -1;
     }
     return returnVal;
 }
 
-function testNestedThreeLevelTransactionFailedWithRetrySuccess() returns (int, int, string) {
-    jdbc:Client testDB = new({
-        url: "jdbc:hsqldb:file:./target/tempdb/TEST_SQL_CONNECTOR_TR",
-        username: "SA",
-        poolOptions: { maximumPoolSize: 1 }
-    });
-
-    int returnVal = 0;
-    string a = "start";
-    int count;
-    var ret = trap testNestedThreeLevelTransactionFailedWithRetrySuccessHelper(a, testDB);
-    if (ret is (string, int)) {
-        (a, returnVal) = ret;
-    }
-    //check whether update action is performed
-    var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 666", ResultCount
-    );
-    count = getTableCountValColumn(dt);
-    testDB.stop();
-    return (returnVal, count, a);
+@transactions:Participant {}
+function testNestedThreeLevelTransactionFailedHelperParticipant1(jdbc:Client testDB) {
+    _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
+                                        values ('James', 'Clerk', 555, 5000.75, 'USA')");
+    testNestedThreeLevelTransactionFailedHelperParticipant2(testDB);
 }
 
-function testNestedThreeLevelTransactionFailedWithRetrySuccessHelper(string status, jdbc:Client testDB) returns (string, int) {
-    int returnVal = 0;
-    int index = 0;
-    string a = status;
-    transaction {
-        a = a + " txL1";
-        _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
-                                        values ('James', 'Clerk', 666, 5000.75, 'USA')");
-        transaction {
-            a = a + " txL2";
-            _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
-                                            values ('James', 'Clerk', 666, 5000.75, 'USA')");
-            transaction with retries = 2 {
-                a = a + " txL3";
-                if (index == 1) {
-                    a = a + " txL3_If";
-                    _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
-                                                    values ('James', 'Clerk', 666, 5000.75, 'USA')");
-                } else {
-                    a = a + " txL3_Else";
-                    _ = testDB->update("Insert into Customers (invalidColumn,lastName,registrationID,creditLimit,country)
-                                                    values ('James', 'Clerk', 666, 5000.75, 'USA')");
-                }
-            } onretry {
-                a = a + " txL3_Failed";
-                index = index + 1;
-            }
-        }
-    } onretry {
-        a = a + " txL1_Falied";
-        returnVal = -1;
-    }
-    return (a, returnVal);
+@transactions:Participant {}
+function testNestedThreeLevelTransactionFailedHelperParticipant2(jdbc:Client testDB) {
+    _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
+                                            values ('James', 'Clerk', 555, 5000.75, 'USA')");
+    testNestedThreeLevelTransactionFailedHelperParticipant3(testDB);
+}
+
+@transactions:Participant {}
+function testNestedThreeLevelTransactionFailedHelperParticipant3(jdbc:Client testDB) {
+    _ = testDB->update("Insert into Customers (invalidColumn,lastName,registrationID,creditLimit,country)
+                                            values ('James', 'Clerk', 555, 5000.75, 'USA')");
 }
 
 function testLocalTransactionWithSelectAndForeachIteration() returns (int, int) {

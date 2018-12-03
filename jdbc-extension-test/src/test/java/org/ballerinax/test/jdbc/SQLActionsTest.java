@@ -20,15 +20,11 @@ import org.ballerinalang.launcher.util.BCompileUtil;
 import org.ballerinalang.launcher.util.BRunUtil;
 import org.ballerinalang.launcher.util.CompileResult;
 import org.ballerinalang.model.values.BBoolean;
-import org.ballerinalang.model.values.BBooleanArray;
-import org.ballerinalang.model.values.BByteArray;
 import org.ballerinalang.model.values.BFloat;
-import org.ballerinalang.model.values.BFloatArray;
-import org.ballerinalang.model.values.BIntArray;
 import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BString;
-import org.ballerinalang.model.values.BStringArray;
 import org.ballerinalang.model.values.BValue;
+import org.ballerinalang.model.values.BValueArray;
 import org.ballerinax.test.utils.SQLDBUtils;
 import org.ballerinax.test.utils.SQLDBUtils.ContainerizedTestDatabase;
 import org.ballerinax.test.utils.SQLDBUtils.DBType;
@@ -188,7 +184,7 @@ public class SQLActionsTest {
         Assert.assertEquals(returns[1].stringValue(), "nil");
     }
 
-    @Test(groups = {CONNECTOR_TEST, MYSQL_NOT_SUPPORTED, POSTGRES_NOT_SUPPORTED, H2_NOT_SUPPORTED})
+    @Test(groups = {CONNECTOR_TEST, POSTGRES_NOT_SUPPORTED, H2_NOT_SUPPORTED})
     public void testCallProcedureWithResultSet() {
         BValue[] returns = BRunUtil.invokeFunction(result, "testCallProcedureWithResultSet", connectionArgs);
         BString retValue = (BString) returns[0];
@@ -362,7 +358,7 @@ public class SQLActionsTest {
     public void testBlobInParameter() {
         BValue[] returns = BRunUtil.invoke(result, "testBlobInParameter", connectionArgs);
         BInteger retInt = (BInteger) returns[0];
-        BByteArray retBytes = (BByteArray) returns[1];
+        BValueArray retBytes = (BValueArray) returns[1];
         Assert.assertEquals(retInt.intValue(), 1);
         Assert.assertEquals(new String(retBytes.getBytes()), "blob data");
     }
@@ -465,38 +461,38 @@ public class SQLActionsTest {
         BInteger retValue = (BInteger) returns[0];
         Assert.assertEquals(retValue.intValue(), 1);
 
-        Assert.assertTrue(returns[1] instanceof BIntArray);
-        BIntArray intArray = (BIntArray) returns[1];
-        Assert.assertEquals(intArray.get(0), 1);
+        Assert.assertTrue(returns[1] instanceof BValueArray);
+        BValueArray intArray = (BValueArray) returns[1];
+        Assert.assertEquals(intArray.getInt(0), 1);
 
-        Assert.assertTrue(returns[2] instanceof BIntArray);
-        BIntArray longArray = (BIntArray) returns[2];
-        Assert.assertEquals(longArray.get(0), 1503383034226L);
-        Assert.assertEquals(longArray.get(1), 1503383034224L);
-        Assert.assertEquals(longArray.get(2), 1503383034225L);
+        Assert.assertTrue(returns[2] instanceof BValueArray);
+        BValueArray longArray = (BValueArray) returns[2];
+        Assert.assertEquals(longArray.getInt(0), 1503383034226L);
+        Assert.assertEquals(longArray.getInt(1), 1503383034224L);
+        Assert.assertEquals(longArray.getInt(2), 1503383034225L);
 
-        Assert.assertTrue(returns[3] instanceof BFloatArray);
-        BFloatArray doubleArray = (BFloatArray) returns[3];
-        Assert.assertEquals(doubleArray.get(0), 1503383034226.23D);
-        Assert.assertEquals(doubleArray.get(1), 1503383034224.43D);
-        Assert.assertEquals(doubleArray.get(2), 1503383034225.123D);
+        Assert.assertTrue(returns[3] instanceof BValueArray);
+        BValueArray doubleArray = (BValueArray) returns[3];
+        Assert.assertEquals(doubleArray.getFloat(0), 1503383034226.23D);
+        Assert.assertEquals(doubleArray.getFloat(1), 1503383034224.43D);
+        Assert.assertEquals(doubleArray.getFloat(2), 1503383034225.123D);
 
-        Assert.assertTrue(returns[4] instanceof BStringArray);
-        BStringArray stringArray = (BStringArray) returns[4];
-        Assert.assertEquals(stringArray.get(0), "Hello");
-        Assert.assertEquals(stringArray.get(1), "Ballerina");
+        Assert.assertTrue(returns[4] instanceof BValueArray);
+        BValueArray stringArray = (BValueArray) returns[4];
+        Assert.assertEquals(stringArray.getString(0), "Hello");
+        Assert.assertEquals(stringArray.getString(1), "Ballerina");
 
-        Assert.assertTrue(returns[5] instanceof BBooleanArray);
-        BBooleanArray booleanArray = (BBooleanArray) returns[5];
-        Assert.assertEquals(booleanArray.get(0), 1);
-        Assert.assertEquals(booleanArray.get(1), 0);
-        Assert.assertEquals(booleanArray.get(2), 1);
+        Assert.assertTrue(returns[5] instanceof BValueArray);
+        BValueArray booleanArray = (BValueArray) returns[5];
+        Assert.assertEquals(booleanArray.getBoolean(0), 1);
+        Assert.assertEquals(booleanArray.getBoolean(1), 0);
+        Assert.assertEquals(booleanArray.getBoolean(2), 1);
 
-        Assert.assertTrue(returns[6] instanceof BFloatArray);
-        BFloatArray floatArray = (BFloatArray) returns[6];
-        Assert.assertEquals(floatArray.get(0), 245.23);
-        Assert.assertEquals(floatArray.get(1), 5559.49);
-        Assert.assertEquals(floatArray.get(2), 8796.123);
+        Assert.assertTrue(returns[6] instanceof BValueArray);
+        BValueArray floatArray = (BValueArray) returns[6];
+        Assert.assertEquals(floatArray.getFloat(0), 245.23);
+        Assert.assertEquals(floatArray.getFloat(1), 5559.49);
+        Assert.assertEquals(floatArray.getFloat(2), 8796.123);
     }
 
     @Test(groups = {CONNECTOR_TEST, MYSQL_NOT_SUPPORTED, H2_NOT_SUPPORTED})
@@ -525,25 +521,25 @@ public class SQLActionsTest {
     @Test(groups = CONNECTOR_TEST)
     public void testBatchUpdate() {
         BValue[] returns = BRunUtil.invoke(result, "testBatchUpdate", connectionArgs);
-        BIntArray retValue = (BIntArray) returns[0];
-        Assert.assertEquals(retValue.get(0), 1);
-        Assert.assertEquals(retValue.get(1), 1);
+        BValueArray retValue = (BValueArray) returns[0];
+        Assert.assertEquals(retValue.getInt(0), 1);
+        Assert.assertEquals(retValue.getInt(1), 1);
     }
 
     @Test(groups = CONNECTOR_TEST)
     public void testBatchUpdateWithValues() {
         BValue[] returns = BRunUtil.invoke(result, "testBatchUpdateWithValues", connectionArgs);
-        BIntArray retValue = (BIntArray) returns[0];
-        Assert.assertEquals(retValue.get(0), 1);
-        Assert.assertEquals(retValue.get(1), 1);
+        BValueArray retValue = (BValueArray) returns[0];
+        Assert.assertEquals(retValue.getInt(0), 1);
+        Assert.assertEquals(retValue.getInt(1), 1);
     }
 
     @Test(groups = CONNECTOR_TEST, description = "Test batch update operation with variable parameters")
     public void testBatchUpdateWithVariables() {
         BValue[] returns = BRunUtil.invoke(result, "testBatchUpdateWithVariables", connectionArgs);
-        BIntArray retValue = (BIntArray) returns[0];
-        Assert.assertEquals(retValue.get(0), 1);
-        Assert.assertEquals(retValue.get(1), 1);
+        BValueArray retValue = (BValueArray) returns[0];
+        Assert.assertEquals(retValue.getInt(0), 1);
+        Assert.assertEquals(retValue.getInt(1), 1);
     }
 
     @Test(groups = CONNECTOR_TEST)
@@ -558,28 +554,28 @@ public class SQLActionsTest {
             expectedResult[0] = -3;
             expectedResult[1] = -3;
         }
-        BIntArray retValue = (BIntArray) returns[0];
-        Assert.assertEquals(retValue.get(0), expectedResult[0]);
-        Assert.assertEquals(retValue.get(1), expectedResult[1]);
-        Assert.assertEquals(retValue.get(2), expectedResult[2]);
-        Assert.assertEquals(retValue.get(3), expectedResult[3]);
+        BValueArray retValue = (BValueArray) returns[0];
+        Assert.assertEquals(retValue.getInt(0), expectedResult[0]);
+        Assert.assertEquals(retValue.getInt(1), expectedResult[1]);
+        Assert.assertEquals(retValue.getInt(2), expectedResult[2]);
+        Assert.assertEquals(retValue.getInt(3), expectedResult[3]);
         Assert.assertEquals(((BInteger) returns[1]).intValue(), 0);
     }
 
     @Test(groups = CONNECTOR_TEST)
     public void testBatchUpdateWithNullParam() {
         BValue[] returns = BRunUtil.invoke(result, "testBatchUpdateWithNullParam", connectionArgs);
-        BIntArray retValue = (BIntArray) returns[0];
-        Assert.assertEquals(retValue.get(0), 1);
+        BValueArray retValue = (BValueArray) returns[0];
+        Assert.assertEquals(retValue.getInt(0), 1);
     }
 
     @Test(groups = CONNECTOR_TEST)
     public void testInsertTimeData() {
         BValue[] returns = BRunUtil.invoke(result, "testDateTimeInParameters", connectionArgs);
-        BIntArray retValue = (BIntArray) returns[0];
-        Assert.assertEquals((int) retValue.get(0), 1);
-        Assert.assertEquals((int) retValue.get(1), 1);
-        Assert.assertEquals((int) retValue.get(2), 1);
+        BValueArray retValue = (BValueArray) returns[0];
+        Assert.assertEquals((int) retValue.getInt(0), 1);
+        Assert.assertEquals((int) retValue.getInt(1), 1);
+        Assert.assertEquals((int) retValue.getInt(2), 1);
     }
 
     @Test(groups = {CONNECTOR_TEST, H2_NOT_SUPPORTED})
