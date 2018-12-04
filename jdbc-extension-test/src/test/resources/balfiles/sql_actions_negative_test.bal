@@ -80,7 +80,7 @@ function testCallProcedure(string jdbcUrl, string userName, string password) ret
     var x = trap testDB->call("{call InsertPersonDataInfo(100,'James')}", ());
 
     if (x is table<record {}>[]) {
-        var j = json.create(x[0]);
+        var j = json.convert(x[0]);
         if (j is json) {
             returnData = io:sprintf("%s", j);
         } else if (j is error) {
@@ -153,7 +153,7 @@ function testInvalidArrayofQueryParameters(string jdbcUrl, string userName, stri
     var x = trap testDB->select("SELECT FirstName from Customers where registrationID in (?)", (), para0);
 
     if (x is table<record {}>) {
-        var j = json.create(x);
+        var j = json.convert(x);
         if (j is json) {
             returnData = io:sprintf("%s", j);
         } else {
@@ -278,7 +278,7 @@ function testCallProcedureWithMultipleResultSetsAndNilConstraintCount(string jdb
 function getJsonConversionResult(table<record {}>|error tableOrError) returns json {
     json retVal = {};
     if (tableOrError is table<record {}>) {
-        var jsonConversionResult = json.create(tableOrError);
+        var jsonConversionResult = json.convert(tableOrError);
         if (jsonConversionResult is json) {
             retVal = jsonConversionResult;
         } else if (jsonConversionResult is error) {
