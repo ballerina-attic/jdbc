@@ -29,7 +29,7 @@ The full list of client properties can be found listed under the `sql:PoolOption
 
 ### Creating tables
 
-This sample creates a table with two columns. One column is of type `int`, and the other is of type `varchar`. The CREATE statement is executed via the `update` operation of the client.
+This sample creates a table with two columns. One column is of type `int`, and the other is of type `varchar`. The CREATE statement is executed via the `update` remote function of the client.
 
 ```ballerina
 // Create the ‘Students’ table with fields ‘id’, 'name' and ‘age’.
@@ -43,9 +43,9 @@ if (returned is int) {
 
 ### Inserting data
 
-This sample shows three examples of data insertion by executing an INSERT statement using the `update` operation of the client.
+This sample shows three examples of data insertion by executing an INSERT statement using the `update` remote function of the client.
 
-In the first example, query parameter values are passed directly into the query statement of the `update` operation:
+In the first example, query parameter values are passed directly into the query statement of the `update`  remote function:
 
 ```ballerina
 var returned = testDB->update("INSERT INTO student(age, name) values (23, 'john')");
@@ -56,7 +56,7 @@ if (returned is int) {
 }
 ```
 
-In the second example, the parameter values, which are in local variables, are passed directly as parameters to the `update` operation. This direct parameter passing can be done for any primitive Ballerina type like string, int, float, or boolean. The sql type of the parameter is derived from the type of the Ballerina variable that is passed in.
+In the second example, the parameter values, which are in local variables, are passed directly as parameters to the `update` remote function. This direct parameter passing can be done for any primitive Ballerina type like string, int, float, or boolean. The sql type of the parameter is derived from the type of the Ballerina variable that is passed in.
 
 ```ballerina
 string name = "Anne";
@@ -69,7 +69,7 @@ if (returned is int) {
 }
 ```
 
-In the third example, parameter values are passed as an `sql:Parameter` to the `update` operation. Use `sql:Parameter` when you need to provide more details such as the exact SQL type of the parameter, or the parameter direction. The default parameter direction is "IN". For more details on parameters, see the `sql` module.
+In the third example, parameter values are passed as an `sql:Parameter` to the `update` remote function. Use `sql:Parameter` when you need to provide more details such as the exact SQL type of the parameter, or the parameter direction. The default parameter direction is "IN". For more details on parameters, see the `sql` module.
 
 ```ballerina
 sql:Parameter p1 = { sqlType: sql:TYPE_VARCHAR, value: "James" };
@@ -84,7 +84,7 @@ if (returned is int) {
 
 ### Inserting data with auto-generated keys
 
-This example demonstrates inserting data while returning the auto-generated keys. It achieves this by using the `updateWithGeneratedKeys` operation to execute the INSERT statement.
+This example demonstrates inserting data while returning the auto-generated keys. It achieves this by using the `updateWithGeneratedKeys` remote function to execute the INSERT statement.
 
 ```ballerina
 int age = 31;
@@ -101,7 +101,7 @@ if (retWithKey is (int, string[])) {
 
 ### Selecting data
 
-This example demonstrates selecting data. First, a type is created to represent the returned result set. Next, the SELECT query is executed via the `select` operation of the client by passing that result set type. Once the query is executed, each data record can be retrieved by looping the result set. The table returned by the select operation holds a pointer to the actual data in the database and it loads data from the table only when it is accessed. This table can be iterated only once.
+This example demonstrates selecting data. First, a type is created to represent the returned result set. Next, the SELECT query is executed via the `select` remote function of the client by passing that result set type. Once the query is executed, each data record can be retrieved by looping the result set. The table returned by the select operation holds a pointer to the actual data in the database and it loads data from the table only when it is accessed. This table can be iterated only once.
 
 ```ballerina
 // Define a type to represent the results set.
@@ -115,7 +115,7 @@ type Student record {
 var selectRet = testDB->select("SELECT * FROM student", Student);
 if (selectRet is table<Student>) {
     // Iterating returned table.
-    foreach row in selectRet {
+    foreach var row in selectRet {
         io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
     }
 } else if (selectRet is error) {
@@ -123,17 +123,17 @@ if (selectRet is table<Student>) {
 }
 ```
 
-To re-iterate the same table multiple times, set the `loadToMemory` argument to true within the `select` action.
+To re-iterate the same table multiple times, set the `loadToMemory` argument to true within the `select` remote function.
 
 ```ballerina
 var selectRet = testDB->select("SELECT * FROM student", Student, loadToMemory = true);
 if (selectRet is table<Student>) {
     // Iterating data first time.
-    foreach row in selectRet {
+    foreach var row in selectRet {
         io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
     }
     // Iterating data second time.
-    foreach row in selectRet {
+    foreach var row in selectRet {
         io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
     }
 } else if (selectRet is error) {
@@ -143,7 +143,7 @@ if (selectRet is table<Student>) {
 
 ### Updating data
 
-This example demonstrates modifying data by executing an UPDATE statement via the `update` operation of the client
+This example demonstrates modifying data by executing an UPDATE statement via the `update` remote function of the client
 ```ballerina
 var returned = testDB->update("UPDATE student SET name = 'Jones' WHERE age = ?", 23);
 if (returned is int) {
@@ -155,7 +155,7 @@ if (returned is int) {
 
 ### Batch updating data
 
-This example demonstrates how to insert multiple records with a single INSERT statement that is executed via the `batchUpdate` operation of the client. This is done by first creating multiple parameter arrays, each representing a single record, and then passing those arrays to the `batchUpdate` operation. Similarly, multiple UPDATE statements can also be executed via `batchUpdate`.
+This example demonstrates how to insert multiple records with a single INSERT statement that is executed via the `batchUpdate` remote function of the client. This is done by first creating multiple parameter arrays, each representing a single record, and then passing those arrays to the `batchUpdate` operation. Similarly, multiple UPDATE statements can also be executed via `batchUpdate`.
 
 ```ballerina
 // Create the first batch of parameters.
@@ -180,7 +180,7 @@ if (retBatch is int[]) {
 
 ### Calling stored procedures
 
-The following examples demonstrate executing stored procedures via the `call` operation of the client.
+The following examples demonstrate executing stored procedures via the `call` remote function of the client.
 
 The first example shows how to create and call a simple stored procedure that inserts data.
 ```ballerina
@@ -223,7 +223,7 @@ sql:Parameter param1 = { sqlType: sql:TYPE_INTEGER, value: 3, direction: sql:DIR
 sql:Parameter param2 = { sqlType: sql:TYPE_INTEGER, direction: sql:DIRECTION_OUT };
 var retCall = testDB->call("{CALL GETCOUNT(?,?)}", (), param1, param2);
 if (retCall is ()|table<record {}>[]) {
-    io:println("Call action successful");
+    io:println("Call operation successful");
     io:print("Student count with ID = 3: ");
     io:println(param1.value);
     io:print("Student count with ID = 2: ");
