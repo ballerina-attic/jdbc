@@ -1610,7 +1610,7 @@ function getBatchUpdateCount(int[]|error result) returns int[] {
 function getJsonConversionResult(table<record {}>|error tableOrError) returns json {
     json retVal = {};
     if (tableOrError is table<record {}>) {
-        var jsonConversionResult = json.create(tableOrError);
+        var jsonConversionResult = json.convert(tableOrError);
         if (jsonConversionResult is json) {
             retVal = jsonConversionResult;
         } else if (jsonConversionResult is error) {
@@ -1625,7 +1625,7 @@ function getJsonConversionResult(table<record {}>|error tableOrError) returns js
 function getXMLConversionResult(table<record {}>|error tableOrError) returns xml {
     xml retVal = xml `<Error/>`;
     if (tableOrError is table<record {}>) {
-        var xmlConversionResult = xml.create(tableOrError);
+        var xmlConversionResult = xml.convert(tableOrError);
         if (xmlConversionResult is xml) {
             retVal = xmlConversionResult;
         } else if (xmlConversionResult is error) {
