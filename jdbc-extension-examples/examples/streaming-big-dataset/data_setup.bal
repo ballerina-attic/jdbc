@@ -4,8 +4,8 @@ import ballerinax/jdbc;
 public function main() {
     jdbc:Client testDB = new({
             url: "jdbc:mysql://localhost:3306/StreamTestDB",
-            username: "user1",
-            password: "pass1",
+            username: "test",
+            password: "test",
             poolOptions: { maximumPoolSize: 5 }
         });
 

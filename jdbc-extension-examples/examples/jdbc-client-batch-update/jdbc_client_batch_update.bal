@@ -1,7 +1,7 @@
 import ballerina/io;
 import ballerinax/jdbc;
 
-// Client endpoint for MySQL database. This client endpoint can be used with any jdbc
+// Client for MySQL database. This client can be used with any jdbc
 // supported database by providing the corresponding jdbc url.
 jdbc:Client testDB = new({
         url: "jdbc:mysql://localhost:3306/testdb",
@@ -46,7 +46,8 @@ public function main() {
     myBatchType[][] dataBatch = [];
     int i = 0;
 
-    foreach (studentData in jsonMsg.student) {
+    json[] students = <json[]>jsonMsg.student;
+    foreach (var studentData in students) {
         string name = studentData.firstname.toString();
         int age = <int>studentData.age;
 
@@ -89,7 +90,7 @@ function checkData() {
     if (dtReturned is table<Student>) {
         // Iterating data.
         io:println("Data in students table:");
-        foreach row in dtReturned {
+        foreach var row in dtReturned {
             io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
         }
     } else if (dtReturned is error) {
