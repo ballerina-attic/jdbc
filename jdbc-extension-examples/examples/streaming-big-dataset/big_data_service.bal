@@ -2,7 +2,7 @@ import ballerina/http;
 import ballerina/log;
 import ballerinax/jdbc;
 
-// Create MySQL client endpoint.
+// Create MySQL client.
 jdbc:Client testDB = new({
         url: "jdbc:mysql://localhost:3306/StreamTestDB",
         username: "test",
@@ -16,7 +16,7 @@ service dataService on new http:Listener(9090) {
     resource function getData(http:Caller caller, http:Request req) {
         http:Response res = new;
 
-        // Invoke `select` operation on the MySQL database client and obtain a large amount of data.
+        // Invoke `select` remote function on the MySQL database client and obtain a large amount of data.
         var selectRet = testDB->select("SELECT * FROM Data", ());
         if (selectRet is table <record {}>) {
             // Convert the obtained data to JSON. Note that this conversion does not load
