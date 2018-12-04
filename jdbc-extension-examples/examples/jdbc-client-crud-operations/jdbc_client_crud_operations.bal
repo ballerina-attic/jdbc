@@ -2,7 +2,7 @@ import ballerina/io;
 import ballerina/sql;
 import ballerinax/jdbc;
 
-// Client endpoint for MySQL database. This client endpoint can be used with any jdbc
+// Client for MySQL database. This client can be used with any jdbc
 // supported database by providing the corresponding jdbc url.
 jdbc:Client testDB = new({
         url: "jdbc:mysql://localhost:3306/testdb",
@@ -27,16 +27,18 @@ public function main() {
                          age INT, name VARCHAR(255), PRIMARY KEY (id))");
     handleUpdate(ret, "Create student table");
 
-    // Inserts data to the table using the update operation. If the DML statement execution
-    // is successful, the `update` operation returns the updated row count.
-    // The query parameters are given in the query statement it self.
+    // Inserts data to the table using the update operation. If the DML
+    // statement execution is successful, the `update` operation returns the
+    // updated row count. The query parameters are given in the query
+    // statement it self.
     io:println("\nThe update operation - Inserting data to a table");
     ret = testDB->update("INSERT INTO student(age, name) values
                           (23, 'john')");
     handleUpdate(ret, "Insert to student table with no parameters");
 
-    // The query parameters are given as variables for the update operation. Only int,
-    // float, boolean, and string values are supported as direct variables.
+    // The query parameters are given as variables for the update operation.
+    // Only int, float, boolean, and string values are supported as direct
+    // variables.
     int age = 24;
     string name = "Anne";
     ret = testDB->update("INSERT INTO student(age, name) values (?, ?)",

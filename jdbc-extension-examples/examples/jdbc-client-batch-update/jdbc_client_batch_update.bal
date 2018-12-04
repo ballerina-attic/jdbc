@@ -1,7 +1,7 @@
 import ballerina/io;
 import ballerinax/jdbc;
 
-// Client endpoint for MySQL database. This client endpoint can be used with any jdbc
+// Client for MySQL database. This client can be used with any jdbc
 // supported database by providing the corresponding jdbc url.
 jdbc:Client testDB = new({
         url: "jdbc:mysql://localhost:3306/testdb",
