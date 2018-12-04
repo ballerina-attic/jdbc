@@ -107,7 +107,7 @@ function checkData() {
     if (dtReturned is table<Student>) {
         // Iterating data.
         io:println("Data in students table:");
-        foreach row in dtReturned {
+        foreach var row in dtReturned {
             io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
         }
     } else if (dtReturned is error) {

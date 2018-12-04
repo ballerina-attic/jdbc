@@ -94,7 +94,7 @@ public function main() {
         // This allows unlimited payload sizes in the result and the response is
         // instantaneous to the client.
         // Convert a table to JSON.
-        var jsonConversionRet = json.create(selectRet);
+        var jsonConversionRet = json.convert(selectRet);
         if (jsonConversionRet is json) {
             io:print("JSON: ");
             io:println(io:sprintf("%s", jsonConversionRet));
@@ -114,12 +114,12 @@ public function main() {
     if (selectRet is table<Student>) {
         // Iterating data first time.
         io:println("Iterating data first time:");
-        foreach row in selectRet {
+        foreach var row in selectRet {
             io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
         }
         // Iterating data second time.
         io:println("Iterating data second time:");
-        foreach row in selectRet {
+        foreach var row in selectRet {
             io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
         }
     } else if (selectRet is error) {
