@@ -26,7 +26,7 @@
             </run>
         </groups>
         <packages>
-            <package name="org.ballerinax.test.jdbc"/>
+            <package name="org.ballerinax.test.jdbc.*"/>
         </packages>
     </test>
 </suite>

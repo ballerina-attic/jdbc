@@ -26,13 +26,14 @@
     <groupId>org.ballerinax.jdbc</groupId>
     <artifactId>jdbc-extension-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Ballerina - jdbc</name>
+    <name>Ballerinax - JDBC</name>
     <url>http://ballerinalang.org</url>
     <modules>
         <module>jdbc-extension</module>
         <module>jdbc-extension-test</module>
+        <module>jdbc-extension-examples</module>
     </modules>
-    <version>0.982.1-SNAPSHOT</version>
+    <version>0.983.1-SNAPSHOT</version>
 
     <dependencyManagement>
         <dependencies>
@@ -377,6 +378,11 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven.assembly.plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -444,7 +450,8 @@
         <maven.spotbugsplugin.exclude.file>spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
         <maven.checkstyleplugin.excludes>**/generated/**</maven.checkstyleplugin.excludes>
         <maven.surefire.plugin.version>2.22.1</maven.surefire.plugin.version>
-        <ballerina.version>0.982.1-SNAPSHOT</ballerina.version>
+        <maven.assembly.plugin.version>2.5.2</maven.assembly.plugin.version>
+        <ballerina.version>0.983.1-SNAPSHOT</ballerina.version>
         <testcontainers.version>1.7.2</testcontainers.version>
         <mysql.version>5.1.46</mysql.version>
         <postgresql.version>42.2.1</postgresql.version>
