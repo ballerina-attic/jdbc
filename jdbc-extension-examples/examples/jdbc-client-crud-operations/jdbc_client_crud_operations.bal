@@ -80,7 +80,7 @@ public function main() {
         var (count, ids) = retWithKey;
         io:println("Inserted row count: " + count);
         io:println("Generated key: " + ids[0]);
-    } else if (retWithKey is error) {
+    } else {
         io:println("Insert to table failed: " + <string>retWithKey.detail().message);
     }
 
@@ -138,7 +138,7 @@ public function main() {
 function handleUpdate(int|error returned, string message) {
     if (returned is int) {
         io:println(message + " status: " + returned);
-    } else if (returned is error) {
+    } else {
         io:println(message + " failed: " + <string>returned.detail().message);
     }
 }
