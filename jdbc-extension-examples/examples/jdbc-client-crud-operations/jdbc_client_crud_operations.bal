@@ -103,7 +103,7 @@ public function main() {
         } else {
             io:println("Error in table to json conversion");
         }
-    } else if (selectRet is error) {
+    } else {
         io:println("Select data from student table failed: "
                 + <string>selectRet.detail().message);
     }
@@ -124,7 +124,7 @@ public function main() {
         foreach var row in selectRet {
             io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
         }
-    } else if (selectRet is error) {
+    } else {
         io:println("Select data from student table failed: "
                 + <string>selectRet.detail().message);
     }

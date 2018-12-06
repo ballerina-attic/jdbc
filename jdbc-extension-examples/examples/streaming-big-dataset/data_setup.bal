@@ -39,7 +39,7 @@ public function main() {
     var retCall = testDB->call("CALL PopulateData(?)", (), 100000);
     if (retCall is ()|table<record {}>[]) {
         io:println("Call operation is successful");
-    } else if (retCall is error) {
+    } else {
         io:println("Stored procedure call failed: " + <string>retCall.detail().message);
     }
 }

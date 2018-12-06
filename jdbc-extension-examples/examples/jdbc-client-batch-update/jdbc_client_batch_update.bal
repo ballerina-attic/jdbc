@@ -93,7 +93,7 @@ function checkData() {
         foreach var row in dtReturned {
             io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
         }
-    } else if (dtReturned is error) {
+    } else {
         io:println("Select data from student table failed: "
                 + <string>dtReturned.detail().message);
     }
