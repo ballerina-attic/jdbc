@@ -62,7 +62,7 @@ public function main() {
     if (retBatch is int[]) {
         io:println("Batch 1 update counts: " + retBatch[0]);
         io:println("Batch 2 update counts: " + retBatch[1]);
-    } else if (retBatch is error) {
+    } else {
         io:println("Batch update operation failed: " + <string>retBatch.detail().message);
     }
 
@@ -78,7 +78,7 @@ public function main() {
 function handleUpdate(int|error returned, string message) {
     if (returned is int) {
         io:println(message + " status: " + returned);
-    } else if (returned is error) {
+    } else {
         io:println(message + " failed: " + <string>returned.detail().message);
     }
 }
@@ -93,7 +93,7 @@ function checkData() {
         foreach var row in dtReturned {
             io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
         }
-    } else if (dtReturned is error) {
+    } else {
         io:println("Select data from student table failed: "
                 + <string>dtReturned.detail().message);
     }

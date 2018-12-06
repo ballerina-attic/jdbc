@@ -80,7 +80,7 @@ public function main() {
         var (count, ids) = retWithKey;
         io:println("Inserted row count: " + count);
         io:println("Generated key: " + ids[0]);
-    } else if (retWithKey is error) {
+    } else {
         io:println("Insert to table failed: " + <string>retWithKey.detail().message);
     }
 
@@ -103,7 +103,7 @@ public function main() {
         } else {
             io:println("Error in table to json conversion");
         }
-    } else if (selectRet is error) {
+    } else {
         io:println("Select data from student table failed: "
                 + <string>selectRet.detail().message);
     }
@@ -124,7 +124,7 @@ public function main() {
         foreach var row in selectRet {
             io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
         }
-    } else if (selectRet is error) {
+    } else {
         io:println("Select data from student table failed: "
                 + <string>selectRet.detail().message);
     }
@@ -138,7 +138,7 @@ public function main() {
 function handleUpdate(int|error returned, string message) {
     if (returned is int) {
         io:println(message + " status: " + returned);
-    } else if (returned is error) {
+    } else {
         io:println(message + " failed: " + <string>returned.detail().message);
     }
 }

@@ -39,7 +39,7 @@ public function main() {
     var retCall = testDB->call("CALL PopulateData(?)", (), 100000);
     if (retCall is ()|table<record {}>[]) {
         io:println("Call operation is successful");
-    } else if (retCall is error) {
+    } else {
         io:println("Stored procedure call failed: " + <string>retCall.detail().message);
     }
 }
@@ -48,7 +48,7 @@ public function main() {
 function handleUpdate(int|error returned, string message) {
     if (returned is int) {
         io:println(message + " status: " + returned);
-    } else if (returned is error) {
+    } else {
         io:println(message + " failed: " + <string>returned.detail().message);
     }
 }
