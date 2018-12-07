@@ -38,7 +38,6 @@ type ResultBlob record {
 
 type ResultRowIDBlob record {
     int row_id;
-    byte[] BLOB_TYPE;
 };
 
 type ResultDataType record {
