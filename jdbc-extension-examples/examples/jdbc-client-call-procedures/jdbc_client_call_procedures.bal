@@ -53,7 +53,7 @@ public function main() {
     var retCall = testDB->call("{CALL INSERTDATA(?,?)}", (), 20, "George");
     if (retCall is ()|table<record {}>[]) {
         io:println("Call operation with IN params successful");
-    } else if (retCall is error) {
+    } else {
         io:println("Stored procedure call failed: "
                 + <string>retCall.detail().message);
     }
@@ -72,7 +72,7 @@ public function main() {
         io:println(param1.value);
         io:print("Student count with age = 20: ");
         io:println(param2.value);
-    } else if (retCall is error) {
+    } else {
         io:println("Stored procedure call failed: "
                 + <string>retCall.detail().message);
     }
@@ -95,7 +95,7 @@ public function main() {
 function handleUpdate(int|error returned, string message) {
     if (returned is int) {
         io:println(message + " status: " + returned);
-    } else if (returned is error) {
+    } else {
         io:println(message + " failed: " + <string>returned.detail().message);
     }
 }
@@ -110,7 +110,7 @@ function checkData() {
         foreach var row in dtReturned {
             io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
         }
-    } else if (dtReturned is error) {
+    } else {
         io:println("Select data from student table failed: "
                 + <string>dtReturned.detail().message);
     }
