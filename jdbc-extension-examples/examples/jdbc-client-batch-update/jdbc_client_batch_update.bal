@@ -1,8 +1,8 @@
 import ballerina/io;
 import ballerinax/jdbc;
 
-// Client for MySQL database. This client can be used with any jdbc
-// supported database by providing the corresponding jdbc url.
+// Client for MySQL database. This client can be used with any JDBC
+// supported database by providing the corresponding JDBC url.
 jdbc:Client testDB = new({
         url: "jdbc:mysql://localhost:3306/testdb",
         username: "test",
@@ -11,7 +11,7 @@ jdbc:Client testDB = new({
         dbOptions: { useSSL: false }
     });
 
-// This is the type created to represent data row.
+// This is the `type` created to represent a data row.
 type Student record {
     int id;
     int age;
@@ -21,8 +21,9 @@ type Student record {
 type myBatchType int|string;
 
 public function main() {
-    // Creates a table using the update operation. If the DDL
-    // statement execution is successful, the `update` operation returns 0.
+    // Create a table using the `update` remote function. If the DDL
+    // statement execution is successful, the `update` remote function
+    // returns 0.
     io:println("The update operation - Creating a table:");
     var ret = testDB->update("CREATE TABLE student(id INT AUTO_INCREMENT,
                          age INT, name VARCHAR(255), PRIMARY KEY (id))");
@@ -55,8 +56,9 @@ public function main() {
         dataBatch[i] = dataRow;
         i = i + 1;
     }
-    // A batch of data can be inserted using the `batchUpdate` operation. The number
-    // of inserted rows for each insert in the batch is returned as an array.
+    // A batch of data can be inserted using the `batchUpdate` remote function.
+    // The number of inserted rows for each insert in the batch is returned as
+    // an array.
     var retBatch = testDB->batchUpdate("INSERT INTO student
                     (age,name) VALUES (?,?)", ...dataBatch);
     if (retBatch is int[]) {
@@ -66,7 +68,7 @@ public function main() {
         io:println("Batch update operation failed: " + <string>retBatch.detail().message);
     }
 
-    //Check the data in the database.
+    // Check the data in the database.
     checkData();
 
     io:println("\nThe update operation - Drop the student table");
@@ -74,7 +76,7 @@ public function main() {
     handleUpdate(ret, "Drop table student");
 }
 
-// Function to handle return of the update operation.
+// Function to handle return value of the `update` remote function.
 function handleUpdate(int|error returned, string message) {
     if (returned is int) {
         io:println(message + " status: " + returned);
