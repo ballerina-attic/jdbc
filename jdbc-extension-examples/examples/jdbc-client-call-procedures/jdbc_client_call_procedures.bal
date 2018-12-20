@@ -2,8 +2,8 @@ import ballerina/io;
 import ballerina/sql;
 import ballerinax/jdbc;
 
-// Client for MySQL database. This client can be used with any jdbc
-// supported database by providing the corresponding jdbc url.
+// Client for MySQL database. This client can be used with any JDBC
+// supported database by providing the corresponding JDBC URL.
 jdbc:Client testDB = new({
         url: "jdbc:mysql://localhost:3306/testdb",
         username: "test",
@@ -12,7 +12,7 @@ jdbc:Client testDB = new({
         dbOptions: { useSSL: false }
     });
 
-// This is the type created to represent data row.
+// This is the `type` created to represent a data row.
 type Student record {
     int id;
     int age;
@@ -20,8 +20,9 @@ type Student record {
 };
 
 public function main() {
-    // Creates a table using the update operation. If the DDL
-    // statement execution is successful, the `update` operation returns 0.
+    // Create a table using the `update` remote function. If the DDL
+    // statement execution is successful, the `update` remote function
+    // returns 0.
     io:println("The update operation - Creating table and procedures:");
     var ret = testDB->update("CREATE TABLE student(id INT AUTO_INCREMENT,
                          age INT, name VARCHAR(255), PRIMARY KEY (id))");
@@ -46,8 +47,8 @@ public function main() {
     handleUpdate(ret, "Stored procedure with INOUT/OUT param creation");
 
 
-    // Call operiation is used to invoke a stored procedure. Here stored procedure
-    // with IN parameters is invoked.
+    // The remote function `call` is used to invoke a stored procedure.
+    // Here the stored procedure with IN parameters is invoked.
     io:println("\nThe call operation - With IN params");
     // Invoke the stored procedure with IN type parameters.
     var retCall = testDB->call("{CALL INSERTDATA(?,?)}", (), 20, "George");
@@ -91,7 +92,7 @@ public function main() {
     handleUpdate(ret, "Drop stored procedure GETCOUNT");
 }
 
-// Function to handle return of the update operation.
+// Function to handle return value of the `update` remote function.
 function handleUpdate(int|error returned, string message) {
     if (returned is int) {
         io:println(message + " status: " + returned);
