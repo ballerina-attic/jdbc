@@ -47,7 +47,7 @@ public function main() {
     handleUpdate(ret, "Stored procedure with INOUT/OUT param creation");
 
 
-    // `call` remote function is used to invoke a stored procedure.
+    // The remote function `call` is used to invoke a stored procedure.
     // Here the stored procedure with IN parameters is invoked.
     io:println("\nThe call operation - With IN params");
     // Invoke the stored procedure with IN type parameters.
