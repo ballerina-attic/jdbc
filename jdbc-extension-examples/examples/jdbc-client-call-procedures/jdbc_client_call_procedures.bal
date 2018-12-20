@@ -3,7 +3,7 @@ import ballerina/sql;
 import ballerinax/jdbc;
 
 // Client for MySQL database. This client can be used with any JDBC
-// supported database by providing the corresponding JDBC url.
+// supported database by providing the corresponding JDBC URL.
 jdbc:Client testDB = new({
         url: "jdbc:mysql://localhost:3306/testdb",
         username: "test",
