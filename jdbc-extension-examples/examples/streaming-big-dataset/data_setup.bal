@@ -44,7 +44,7 @@ public function main() {
     }
 }
 
-// Function to handle return values of the update operation.
+// Function to handle return value of the update remote function.
 function handleUpdate(int|error returned, string message) {
     if (returned is int) {
         io:println(message + " status: " + returned);
