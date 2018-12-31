@@ -33,7 +33,7 @@
         <module>jdbc-extension-test</module>
         <module>jdbc-extension-examples</module>
     </modules>
-    <version>0.990.2-SNAPSHOT</version>
+    <version>0.990.3-SNAPSHOT</version>
 
     <dependencyManagement>
         <dependencies>
@@ -451,7 +451,7 @@
         <maven.checkstyleplugin.excludes>**/generated/**</maven.checkstyleplugin.excludes>
         <maven.surefire.plugin.version>2.22.1</maven.surefire.plugin.version>
         <maven.assembly.plugin.version>2.5.2</maven.assembly.plugin.version>
-        <ballerina.version>0.990.2-SNAPSHOT</ballerina.version>
+        <ballerina.version>0.990.3-SNAPSHOT</ballerina.version>
         <testcontainers.version>1.7.2</testcontainers.version>
         <mysql.version>5.1.46</mysql.version>
         <postgresql.version>42.2.1</postgresql.version>
