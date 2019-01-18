@@ -29,7 +29,7 @@ public type ClientEndpointConfig record {
     string password = "";
     sql:PoolOptions poolOptions = {};
     map<any> dbOptions = {};
-    !...
+    !...;
 };
 
 # Represents a JDBC SQL client endpoint.
