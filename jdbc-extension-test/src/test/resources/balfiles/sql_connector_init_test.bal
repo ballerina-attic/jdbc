@@ -43,7 +43,7 @@ function testConnectionPoolProperties1() returns (json) {
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
     json j = getJsonConversionResult(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return j;
 }
 
@@ -57,7 +57,7 @@ function testConnectionPoolProperties2() returns (json) {
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
     json j = getJsonConversionResult(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return j;
 }
 
@@ -70,7 +70,7 @@ function testConnectionPoolProperties3() returns (json) {
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
     json j = getJsonConversionResult(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return j;
 }
 
@@ -85,7 +85,7 @@ function testConnectorWithDefaultPropertiesForListedDB() returns (json) {
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
     json j = getJsonConversionResult(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return j;
 }
 
@@ -103,7 +103,7 @@ function testConnectorWithWorkers() returns (json) {
         var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
         json j = getJsonConversionResult(dt);
-        testDB.stop();
+        _ = testDB.stop();
         return j;
     }
     worker w2 {
@@ -123,7 +123,7 @@ function testConnectorWithDataSourceClass() returns (json) {
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
     json j = getJsonConversionResult(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return j;
 }
 
@@ -139,7 +139,7 @@ function testConnectorWithDataSourceClassAndProps() returns (json) {
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
     json j = getJsonConversionResult(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return j;
 }
 
@@ -155,7 +155,7 @@ function testConnectorWithDataSourceClassWithoutURL() returns (json) {
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
     json j = getJsonConversionResult(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return j;
 }
 
@@ -172,7 +172,7 @@ function testConnectorWithDataSourceClassURLPriority() returns (json) {
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
     json j = getJsonConversionResult(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return j;
 }
 
@@ -189,7 +189,7 @@ function testPropertiesGetUsedOnlyIfDataSourceGiven() returns (json) {
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ());
 
     json j = getJsonConversionResult(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return j;
 }
 
@@ -210,10 +210,10 @@ function getJsonConversionResult(table<record {}>|error tableOrError) returns js
         var jsonConversionResult = json.convert(tableOrError);
         if (jsonConversionResult is json) {
             retVal = jsonConversionResult;
-        } else if (jsonConversionResult is error) {
+        } else {
             retVal = {"Error" : <string>jsonConversionResult.detail().message};
         }
-    } else if (tableOrError is error) {
+    } else {
         retVal = {"Error" : <string>tableOrError.detail().message};
     }
     return retVal;

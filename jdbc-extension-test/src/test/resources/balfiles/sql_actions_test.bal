@@ -74,8 +74,8 @@ type ResultBalTypes record {
     float DOUBLE_TYPE;
     boolean BOOLEAN_TYPE;
     string STRING_TYPE;
-    float NUMERIC_TYPE;
-    float DECIMAL_TYPE;
+    decimal NUMERIC_TYPE;
+    decimal DECIMAL_TYPE;
     float REAL_TYPE;
 };
 
@@ -95,7 +95,7 @@ function testInsertTableData(string jdbcUrl, string userName, string password) r
     var result = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                          values ('James', 'Clerk', 3, 5000.75, 'USA')");
     int insertCount = getIntResult(result);
-    testDB.stop();
+    _ = testDB.stop();
     return insertCount;
 }
 
@@ -108,7 +108,7 @@ function testCreateTable(string jdbcUrl, string userName, string password) retur
     });
     var result = testDB->update("CREATE TABLE IF NOT EXISTS Students(studentID int, LastName varchar(255))");
     int returnValue = getIntResult(result);
-    testDB.stop();
+    _  = testDB.stop();
     return returnValue;
 }
 
@@ -122,11 +122,11 @@ function testUpdateTableData(string jdbcUrl, string userName, string password) r
 
     var result = testDB->update("Update Customers set country = 'UK' where registrationID = 1");
     int updateCount = getIntResult(result);
-    testDB.stop();
+    _ = testDB.stop();
     return updateCount;
 }
 
-function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string password) returns (string) {
+function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string password) returns (int, int) {
     jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
@@ -134,21 +134,16 @@ function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string passwo
         poolOptions: { maximumPoolSize: 1 }
     });
 
-    string returnVal = "";
-
-    var x = testDB->updateWithGeneratedKeys("insert into Customers (firstName,lastName,
-            registrationID,creditLimit,country) values ('Mary', 'Williams', 3, 5000.75, 'USA')", ());
-
-    if (x is (int, string[])) {
-        int a;
-        string[] b;
-        (a, b) = x;
-        returnVal = b[0];
-    } else  if (x is error) {
-        returnVal = x.reason();
+    int count = 0;
+    int generatedKey = 0;
+    var x = testDB->update("insert into Customers (firstName,lastName,
+            registrationID,creditLimit,country) values ('Mary', 'Williams', 3, 5000.75, 'USA')");
+    if (x is sql:UpdateResult) {
+        count = x.updatedRowCount;
+        generatedKey = <int>x.generatedKeys.CUSTOMERID;
     }
-    testDB.stop();
-    return returnVal;
+    _ = testDB.stop();
+    return (count, generatedKey);
 }
 
 function testGeneratedKeyOnInsertEmptyResults(string jdbcUrl, string userName, string password) returns (int|string) {
@@ -161,23 +156,20 @@ function testGeneratedKeyOnInsertEmptyResults(string jdbcUrl, string userName, s
 
     int|string returnVal = "";
 
-    var x = testDB->updateWithGeneratedKeys("insert into CustomersNoKey (firstName,lastName,
-            registrationID,creditLimit,country) values ('Mary', 'Williams', 3, 5000.75, 'USA')", ());
+    var x = testDB->update("insert into CustomersNoKey (firstName,lastName,
+            registrationID,creditLimit,country) values ('Mary', 'Williams', 3, 5000.75, 'USA')");
 
-    if (x is (int, string[])) {
-        int a;
-        string[] b;
-        (a, b) = x;
-        returnVal = b.length();
-    } else if (x is error) {
+    if (x is sql:UpdateResult) {
+        returnVal = x.generatedKeys.length();
+    } else {
         returnVal = x.reason();
     }
-    testDB.stop();
+    _ = testDB.stop();
     return returnVal;
 }
 
 
-function testGeneratedKeyWithColumn(string jdbcUrl, string userName, string password) returns (string) {
+function testGeneratedKeyWithColumn(string jdbcUrl, string userName, string password) returns int {
     jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
@@ -186,30 +178,23 @@ function testGeneratedKeyWithColumn(string jdbcUrl, string userName, string pass
     });
 
     int insertCount;
-    string[] generatedID;
-    string[] keyColumns = ["CUSTOMERID"];
+    string[] keyColumnNames = ["CUSTOMERID"];
     string returnVal = "";
-
     string queryString;
     if (jdbcUrl.contains("postgres")) {
         queryString = "insert into Customers (firstName,lastName,registrationID,creditLimit,country) values
         ('Kathy', 'Williams', 4, 5000.75, 'USA') RETURNING CUSTOMERID";
     } else {
-        queryString = "insert into Customers (firstName,lastName,registrationID,creditLimit,country) values ('Kathy',
-        'Williams', 4, 5000.75, 'USA')";
+        queryString = "insert into Customers (firstName,lastName,registrationID,creditLimit,country) values
+        ('Kathy', 'Williams', 4, 5000.75, 'USA')";
     }
-    var x = testDB->updateWithGeneratedKeys(queryString, keyColumns);
-
-    if (x is (int, string[])) {
-        int a;
-        string[] b;
-        (a, b) = x;
-        returnVal = b[0];
-    } else if (x is error){
-        returnVal = x.reason();
+    var x = testDB->update(queryString, keyColumns = keyColumnNames);
+    int generatedID = 0;
+    if (x is sql:UpdateResult) {
+        generatedID = <int>x.generatedKeys.CUSTOMERID;
     }
-    testDB.stop();
-    return returnVal;
+    _ = testDB.stop();
+    return generatedID;
 }
 
 function testSelectData(string jdbcUrl, string userName, string password) returns (string) {
@@ -221,7 +206,7 @@ function testSelectData(string jdbcUrl, string userName, string password) return
     });
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 1", ResultCustomers);
     string firstName = getTableFirstNameColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return firstName;
 }
 
@@ -250,7 +235,7 @@ function testSelectIntFloatData(string jdbcUrl, string userName, string password
             }
         }
     }
-    testDB.stop();
+    _ = testDB.stop();
     return (int_type, long_type, float_type, double_type);
 }
 
@@ -269,12 +254,12 @@ function testCallProcedure(string jdbcUrl, string userName, string password) ret
         returnValue = "table";
     } else if (ret is ()) {
         returnValue = "nil";
-    } else if (ret is error) {
+    } else {
         returnValue = "error";
     }
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = 100", ResultCustomers);
     string firstName = getTableFirstNameColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (firstName, returnValue);
 }
 
@@ -294,7 +279,7 @@ function testCallProcedureWithResultSet(string jdbcUrl, string userName, string 
     } else if (ret is ()) {
         firstName = "error";
     }
-    testDB.stop();
+    _ = testDB.stop();
     return firstName;
 }
 
@@ -314,7 +299,7 @@ function testCallFunctionWithReturningRefcursor(string jdbcUrl, string userName,
     var dt = para1.value;
     string firstName = dt is table<ResultCustomers> ? getTableFirstNameColumn(dt) : "";
 
-    testDB.stop();
+    _ = testDB.stop();
     return firstName;
 }
 
@@ -348,7 +333,7 @@ function testCallProcedureWithMultipleResultSets(string jdbcUrl, string userName
             }
         }
     }
-    testDB.stop();
+    _ = testDB.stop();
     return (firstName1, firstName2, lastName);
 }
 
@@ -361,7 +346,7 @@ function testQueryParameters(string jdbcUrl, string userName, string password) r
     });
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = ?", ResultCustomers, 1);
     string firstName = getTableFirstNameColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return firstName;
 }
 
@@ -376,7 +361,7 @@ function testQueryParameters2(string jdbcUrl, string userName, string password) 
     sql:Parameter p1 = { sqlType: sql:TYPE_INTEGER, value: 1 };
     var dt = testDB->select("SELECT  FirstName from Customers where registrationID = ?", ResultCustomers, p1);
     string firstName = getTableFirstNameColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return firstName;
 }
 
@@ -398,7 +383,7 @@ function testInsertTableDataWithParameters(string jdbcUrl, string userName, stri
     var result = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                      values (?,?,?,?,?)", para1, para2, para3, para4, para5);
     int insertCount = getIntResult(result);
-    testDB.stop();
+    _ = testDB.stop();
     return insertCount;
 }
 
@@ -413,7 +398,7 @@ function testInsertTableDataWithParameters2(string jdbcUrl, string userName, str
     var result = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                      values (?,?,?,?,?)", "Anne", "James", 3, 5000.75, "UK");
     int insertCount = getIntResult(result);
-    testDB.stop();
+    _ = testDB.stop();
     return insertCount;
 }
 
@@ -429,7 +414,7 @@ function testInsertTableDataWithParameters3(string jdbcUrl, string userName, str
     var result = testDB->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                      values (?,?,?,?,?)", s1, "James", 3, 5000.75, "UK");
     int insertCount = getIntResult(result);
-    testDB.stop();
+    _ = testDB.stop();
     return insertCount;
 }
 
@@ -453,7 +438,7 @@ function testArrayofQueryParameters(string jdbcUrl, string userName, string pass
         lastName = '\"BB\"' or registrationID in(?) or lastName in(?) or creditLimit in(?)", ResultCustomers,
         para0, para1, para2, para3);
     string firstName = getTableFirstNameColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return firstName;
 }
 
@@ -486,7 +471,7 @@ function testBoolArrayofQueryParameters(string jdbcUrl, string userName, string 
             }
         }
     }
-    testDB.stop();
+    _ = testDB.stop();
     return value;
 }
 
@@ -522,7 +507,7 @@ function testBlobArrayQueryParameter(string jdbcUrl, string userName, string pas
             }
         }
     }
-    testDB.stop();
+    _ = testDB.stop();
     return value;
 }
 
@@ -575,7 +560,7 @@ function testArrayInParameters(string jdbcUrl, string userName, string password)
             }
         }
     }
-    testDB.stop();
+    _ = testDB.stop();
     return (insertCount, int_arr, long_arr, double_arr, string_arr, boolean_arr, float_arr);
 }
 
@@ -619,7 +604,7 @@ function testOutParameters(string jdbcUrl, string userName, string password) ret
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
         paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
 
-    testDB.stop();
+    _ = testDB.stop();
 
     return (paraInt.value, paraLong.value, paraFloat.value, paraDouble.value, paraBool.value, paraString.value,
     paraNumeric.value, paraDecimal.value, paraReal.value, paraTinyInt.value, paraSmallInt.value, paraClob.value,
@@ -644,7 +629,7 @@ function testBlobOutInOutParameters(string jdbcUrl, string userName, string pass
 
     _ = testDB->call("{call TestOUTINOUTParamsBlob(?,?,?,?)}", (), paraID1, paraID2, paraBlobOut, paraBlobInOut);
 
-    testDB.stop();
+    _ = testDB.stop();
 
     return (paraBlobOut.value, paraBlobInOut.value);
 }
@@ -688,7 +673,7 @@ function testNullOutParameters(string jdbcUrl, string userName, string password)
     _ = testDB->call("{call TestOutParams(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (),
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
         paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
-    testDB.stop();
+    _ = testDB.stop();
     return (paraInt.value, paraLong.value, paraFloat.value, paraDouble.value, paraBool.value, paraString.value,
     paraNumeric.value, paraDecimal.value, paraReal.value, paraTinyInt.value, paraSmallInt.value, paraClob.value,
     paraBinary.value);
@@ -711,7 +696,7 @@ function testNullOutInOutBlobParameters(string jdbcUrl, string userName, string 
     sql:Parameter paraBlobInOut = { sqlType: sql:TYPE_BLOB, direction: sql:DIRECTION_INOUT };
 
     _ = testDB->call("{call TestOUTINOUTParamsBlob(?,?,?,?)}", (), paraID1, paraID2, paraBlobOut, paraBlobInOut);
-    testDB.stop();
+    _ = testDB.stop();
     return (paraBlobOut.value, paraBlobInOut.value);
 }
 
@@ -748,11 +733,8 @@ function testINParameters(string jdbcUrl, string userName, string password) retu
             smallint_type, clob_type, binary_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
         paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
-    int insertCount = -1;
-    if (ret is int) {
-        insertCount = ret;
-    }
-    testDB.stop();
+    int insertCount = getIntResult(ret);
+    _ = testDB.stop();
     return insertCount;
 }
 
@@ -776,8 +758,8 @@ function testBlobInParameter(string jdbcUrl, string userName, string password) r
         transaction {
             var ret = testDB->update("INSERT INTO BlobTable (row_id,blob_type) VALUES (?,?)",
                 paraID, paraBlob);
-            if (ret is int) {
-                insertCount = ret;
+            if (ret is sql:UpdateResult) {
+                insertCount = ret.updatedRowCount;
             }
             var dt = testDB->select("SELECT blob_type from BlobTable where row_id=3", ResultBlob);
             if (dt is table<ResultBlob>) {
@@ -792,8 +774,8 @@ function testBlobInParameter(string jdbcUrl, string userName, string password) r
     } else {
         var ret1 = testDB->update("INSERT INTO BlobTable (row_id,blob_type) VALUES (?,?)",
             paraID, paraBlob);
-        if (ret1 is int) {
-            insertCount = ret1;
+        if (ret1 is sql:UpdateResult) {
+            insertCount = ret1.updatedRowCount;
         }
         var dt = testDB->select("SELECT blob_type from BlobTable where row_id=3", ResultBlob);
         if (dt is table<ResultBlob>) {
@@ -805,12 +787,12 @@ function testBlobInParameter(string jdbcUrl, string userName, string password) r
             }
         }
     }
-    testDB.stop();
+    _ = testDB.stop();
     return (insertCount, blobVal);
 }
 
 function testINParametersWithDirectValues(string jdbcUrl, string userName, string password) returns (int, int, float,
-        float, boolean, string, float, float, float) {
+        float, boolean, string, decimal, decimal, float) {
     jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
@@ -821,7 +803,10 @@ function testINParametersWithDirectValues(string jdbcUrl, string userName, strin
     var result = testDB->update("INSERT INTO DataTypeTable (row_id, int_type, long_type, float_type,
         double_type, boolean_type, string_type, numeric_type, decimal_type, real_type) VALUES (?,?,?,?,?,?,?,?,?,?)",
         25, 1, 9223372036854774807, 123.34, 2139095039.1, true, "Hello", 1234.567, 1234.567, 1234.567);
-    int insertCount = getIntResult(result);
+    int insertCount = -1;
+    if (result is sql:UpdateResult) {
+        insertCount = result.updatedRowCount;
+    }
     var dt = testDB->select("SELECT int_type, long_type,
             float_type, double_type, boolean_type, string_type, numeric_type, decimal_type, real_type from
             DataTypeTable where row_id = 25", ResultBalTypes);
@@ -831,8 +816,8 @@ function testINParametersWithDirectValues(string jdbcUrl, string userName, strin
     float d = -1;
     boolean b = false;
     string s = "";
-    float n = -1;
-    float dec = -1;
+    decimal n = -1;
+    decimal dec = -1;
     float real = -1;
     if (dt is table<ResultBalTypes>) {
         while (dt.hasNext()) {
@@ -849,12 +834,12 @@ function testINParametersWithDirectValues(string jdbcUrl, string userName, strin
             }
         }
     }
-    testDB.stop();
+    _ = testDB.stop();
     return (i, l, f, d, b, s, n, dec, real);
 }
 
 function testINParametersWithDirectVariables(string jdbcUrl, string userName, string password) returns (int, int, float,
-        float, boolean, string, float, float, float) {
+        float, boolean, string, decimal, decimal, float) {
     jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
@@ -869,15 +854,18 @@ function testINParametersWithDirectVariables(string jdbcUrl, string userName, st
     float doubleType = 2139095039.1;
     boolean boolType = true;
     string stringType = "Hello";
-    float numericType = 1234.567;
-    float decimalType = 1234.567;
+    decimal numericType = 1234.567;
+    decimal decimalType = 1234.567;
     float realType = 1234.567;
 
     var result = testDB->update("INSERT INTO DataTypeTable (row_id, int_type, long_type,
             float_type, double_type, boolean_type, string_type, numeric_type, decimal_type, real_type)
             VALUES (?,?,?,?,?,?,?,?,?,?)", rowid, intType, longType, floatType, doubleType, boolType,
             stringType, numericType, decimalType, realType);
-    int insertCount = getIntResult(result);
+    int insertCount = -1;
+    if (result is sql:UpdateResult) {
+        insertCount = result.updatedRowCount;
+    }
     var dt = testDB->select("SELECT int_type, long_type,
             float_type, double_type, boolean_type, string_type, numeric_type, decimal_type, real_type from
             DataTypeTable where row_id = 26", ResultBalTypes);
@@ -887,8 +875,8 @@ function testINParametersWithDirectVariables(string jdbcUrl, string userName, st
     float d = -1;
     boolean b = false;
     string s = "";
-    float n = -1;
-    float dec = -1;
+    decimal n = -1;
+    decimal dec = -1;
     float real = -1;
 
     if (dt is table<ResultBalTypes>) {
@@ -906,7 +894,7 @@ function testINParametersWithDirectVariables(string jdbcUrl, string userName, st
             }
         }
     }
-    testDB.stop();
+    _ = testDB.stop();
     return (i, l, f, d, b, s, n, dec, real);
 }
 
@@ -938,8 +926,11 @@ function testNullINParameterValues(string jdbcUrl, string userName, string passw
             smallint_type, clob_type, binary_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
         paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
-    int insertCount = getIntResult(result);
-    testDB.stop();
+    int insertCount = -1;
+    if (result is sql:UpdateResult) {
+        insertCount = result.updatedRowCount;
+    }
+    _ = testDB.stop();
     return insertCount;
 }
 
@@ -956,8 +947,11 @@ function testNullINParameterBlobValue(string jdbcUrl, string userName, string pa
 
     var result = testDB->update("INSERT INTO BlobTable (row_id, blob_type) VALUES (?,?)",
         paraID, paraBlob);
-    int insertCount = getIntResult(result);
-    testDB.stop();
+    int insertCount = -1;
+    if (result is sql:UpdateResult) {
+        insertCount = result.updatedRowCount;
+    }
+    _ = testDB.stop();
     return insertCount;
 }
 
@@ -1001,7 +995,7 @@ function testINOutParameters(string jdbcUrl, string userName, string password) r
     _ = testDB->call("{call TestINOUTParams(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (),
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
         paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
-    testDB.stop();
+    _ = testDB.stop();
     return (paraInt.value, paraLong.value, paraFloat.value, paraDouble.value, paraBool.value, paraString.value,
     paraNumeric.value, paraDecimal.value, paraReal.value, paraTinyInt.value, paraSmallInt.value, paraClob.value,
     paraBinary.value);
@@ -1045,7 +1039,7 @@ function testNullINOutParameters(string jdbcUrl, string userName, string passwor
     _ = testDB->call("{call TestINOUTParams(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (),
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
         paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
-    testDB.stop();
+    _ = testDB.stop();
     return (paraInt.value, paraLong.value, paraFloat.value, paraDouble.value, paraBool.value, paraString.value,
     paraNumeric.value, paraDecimal.value, paraReal.value, paraTinyInt.value, paraSmallInt.value, paraClob.value,
     paraBinary.value);
@@ -1060,7 +1054,7 @@ function testEmptySQLType(string jdbcUrl, string userName, string password) retu
     });
     var result = testDB->update("Insert into Customers (firstName) values (?)", "Anne");
     int insertCount = getIntResult(result);
-    testDB.stop();
+    _ = testDB.stop();
     return insertCount;
 }
 
@@ -1081,7 +1075,7 @@ function testArrayOutParameters(string jdbcUrl, string userName, string password
     sql:Parameter para5 = { sqlType: sql:TYPE_ARRAY, direction: sql:DIRECTION_OUT };
     sql:Parameter para6 = { sqlType: sql:TYPE_ARRAY, direction: sql:DIRECTION_OUT };
     _ = testDB->call("{call TestArrayOutParams(?,?,?,?,?,?)}", (), para1, para2, para3, para4, para5, para6);
-    testDB.stop();
+    _ = testDB.stop();
     return (para1.value, para2.value, para3.value, para4.value, para5.value, para6.value);
 }
 
@@ -1116,7 +1110,7 @@ function testArrayInOutParameters(string jdbcUrl, string userName, string passwo
     _ = testDB->call("{call TestArrayInOutParams(?,?,?,?,?,?,?,?)}", (),
         para1, para2, para3, para4, para5, para6, para7, para8);
 
-    testDB.stop();
+    _ = testDB.stop();
     return (para2.value, para3.value, para4.value, para5.value, para6.value, para7.value, para8.value);
 }
 
@@ -1134,7 +1128,7 @@ function testBatchUpdate(string jdbcUrl, string userName, string password) retur
     sql:Parameter para3 = { sqlType: sql:TYPE_INTEGER, value: 20 };
     sql:Parameter para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     sql:Parameter para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters1 = [para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters1 = [para1, para2, para3, para4, para5];
 
     //Batch 2
     para1 = { sqlType: sql:TYPE_VARCHAR, value: "Alex" };
@@ -1142,12 +1136,12 @@ function testBatchUpdate(string jdbcUrl, string userName, string password) retur
     para3 = { sqlType: sql:TYPE_INTEGER, value: 20 };
     para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters2 = [para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters2 = [para1, para2, para3, para4, para5];
 
     var ret = testDB->batchUpdate("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                      values (?,?,?,?,?)", parameters1, parameters2);
     int[] updateCount = getBatchUpdateCount(ret);
-    testDB.stop();
+    _ = testDB.stop();
     return updateCount;
 }
 
@@ -1162,15 +1156,15 @@ function testBatchUpdateWithValues(string jdbcUrl, string userName, string passw
     });
 
     //Batch 1
-    myBatchType[] parameters1 = ["Alex", "Smith", 20, 3400.5, "Colombo"];
+    myBatchType?[] parameters1 = ["Alex", "Smith", 20, 3400.5, "Colombo"];
 
     //Batch 2
-    myBatchType[] parameters2 = ["John", "Gates", 45, 2400.5, "NY"];
+    myBatchType?[] parameters2 = ["John", "Gates", 45, 2400.5, "NY"];
 
     var ret = testDB->batchUpdate("Insert into Customers (firstName,lastName,registrationID,
                             creditLimit,country) values (?,?,?,?,?)", parameters1, parameters2);
     int[] updateCount = getBatchUpdateCount(ret);
-    testDB.stop();
+    _ = testDB.stop();
     return updateCount;
 }
 
@@ -1189,15 +1183,15 @@ function testBatchUpdateWithVariables(string jdbcUrl, string userName, string pa
     float creditlimit = 3400.5;
     string city = "Colombo";
 
-    myBatchType[] parameters1 = [firstName1, lastName1, id, creditlimit, city];
+    myBatchType?[] parameters1 = [firstName1, lastName1, id, creditlimit, city];
 
     //Batch 2
-    myBatchType[] parameters2 = ["John", "Gates", 45, 2400.5, "NY"];
+    myBatchType?[] parameters2 = ["John", "Gates", 45, 2400.5, "NY"];
 
     var ret = testDB->batchUpdate("Insert into Customers (firstName,lastName,registrationID,
                             creditLimit,country) values (?,?,?,?,?)", parameters1, parameters2);
     int[] updateCount = getBatchUpdateCount(ret);
-    testDB.stop();
+    _ = testDB.stop();
     return updateCount;
 }
 
@@ -1216,7 +1210,7 @@ function testBatchUpdateWithFailure(string jdbcUrl, string userName, string pass
     sql:Parameter para3 = { sqlType: sql:TYPE_INTEGER, value: 20 };
     sql:Parameter para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     sql:Parameter para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters1 = [para0, para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters1 = [para0, para1, para2, para3, para4, para5];
 
     //Batch 2
     para0 = { sqlType: sql:TYPE_INTEGER, value: 222 };
@@ -1225,7 +1219,7 @@ function testBatchUpdateWithFailure(string jdbcUrl, string userName, string pass
     para3 = { sqlType: sql:TYPE_INTEGER, value: 20 };
     para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters2 = [para0, para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters2 = [para0, para1, para2, para3, para4, para5];
 
     //Batch 3
     para0 = { sqlType: sql:TYPE_INTEGER, value: 222 };
@@ -1234,7 +1228,7 @@ function testBatchUpdateWithFailure(string jdbcUrl, string userName, string pass
     para3 = { sqlType: sql:TYPE_INTEGER, value: 20 };
     para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters3 = [para0, para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters3 = [para0, para1, para2, para3, para4, para5];
 
     //Batch 4
     para0 = { sqlType: sql:TYPE_INTEGER, value: 333 };
@@ -1243,7 +1237,7 @@ function testBatchUpdateWithFailure(string jdbcUrl, string userName, string pass
     para3 = { sqlType: sql:TYPE_INTEGER, value: 20 };
     para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters4 = [para0, para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters4 = [para0, para1, para2, para3, para4, para5];
 
     var ret = testDB->batchUpdate("Insert into Customers (customerId, firstName,lastName,registrationID,
         creditLimit, country) values (?,?,?,?,?,?)", parameters1, parameters2, parameters3, parameters4);
@@ -1251,7 +1245,7 @@ function testBatchUpdateWithFailure(string jdbcUrl, string userName, string pass
     var dt = testDB->select("SELECT count(*) as countval from Customers where customerId in (111,222,333)",
         ResultCount);
     int count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (updateCount, count);
 }
 
@@ -1266,7 +1260,7 @@ function testBatchUpdateWithNullParam(string jdbcUrl, string userName, string pa
     var ret = testDB->batchUpdate("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                                      values ('Alex','Smith',20,3400.5,'Colombo')");
     int[] updateCount = getBatchUpdateCount(ret);
-    testDB.stop();
+    _ = testDB.stop();
     return updateCount;
 }
 
@@ -1314,7 +1308,7 @@ function testDateTimeInParameters(string jdbcUrl, string userName, string passwo
     int insertCount3 = getIntResult(result3);
     returnValues[2] = insertCount3;
 
-    testDB.stop();
+    _ = testDB.stop();
     return returnValues;
 }
 
@@ -1331,7 +1325,7 @@ function testDateTimeNullInValues(string jdbcUrl, string userName, string passwo
     sql:Parameter para2 = { sqlType: sql:TYPE_TIME, value: () };
     sql:Parameter para3 = { sqlType: sql:TYPE_TIMESTAMP, value: () };
     sql:Parameter para4 = { sqlType: sql:TYPE_DATETIME, value: () };
-    sql:Parameter[] parameters = [para0, para1, para2, para3, para4];
+    sql:Parameter?[] parameters = [para0, para1, para2, para3, para4];
 
     _ = testDB->update("Insert into DateTimeTypes
         (row_id, date_type, time_type, timestamp_type, datetime_type) values (?,?,?,?,?)",
@@ -1340,7 +1334,7 @@ function testDateTimeNullInValues(string jdbcUrl, string userName, string passwo
                 from DateTimeTypes where row_id = 33", ResultDates);
     json j = getJsonConversionResult(dt);
     string data = io:sprintf("%s", j);
-    testDB.stop();
+    _ = testDB.stop();
     return data;
 }
 
@@ -1368,7 +1362,7 @@ function testDateTimeNullOutValues(string jdbcUrl, string userName, string passw
 
     var dt = testDB->select("SELECT count(*) as countval from DateTimeTypes where row_id = 123", ResultCount);
     int count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return count;
 }
 
@@ -1381,13 +1375,13 @@ function testDateTimeNullInOutValues(string jdbcUrl, string userName, string pas
     });
 
     sql:Parameter para1 = { sqlType: sql:TYPE_INTEGER, value: 124 };
-    sql:Parameter para2 = { sqlType: sql:TYPE_DATE, value: null, direction: sql:DIRECTION_INOUT };
-    sql:Parameter para3 = { sqlType: sql:TYPE_TIME, value: null, direction: sql:DIRECTION_INOUT };
-    sql:Parameter para4 = { sqlType: sql:TYPE_TIMESTAMP, value: null, direction: sql:DIRECTION_INOUT };
-    sql:Parameter para5 = { sqlType: sql:TYPE_DATETIME, value: null, direction: sql:DIRECTION_INOUT };
+    sql:Parameter para2 = { sqlType: sql:TYPE_DATE, value: (), direction: sql:DIRECTION_INOUT };
+    sql:Parameter para3 = { sqlType: sql:TYPE_TIME, value: (), direction: sql:DIRECTION_INOUT };
+    sql:Parameter para4 = { sqlType: sql:TYPE_TIMESTAMP, value: (), direction: sql:DIRECTION_INOUT };
+    sql:Parameter para5 = { sqlType: sql:TYPE_DATETIME, value: (), direction: sql:DIRECTION_INOUT };
 
     _ = testDB->call("{call TestDateINOUTParams(?,?,?,?,?)}", (), para1, para2, para3, para4, para5);
-    testDB.stop();
+    _ = testDB.stop();
     return (para2.value, para3.value, para4.value, para5.value);
 }
 
@@ -1411,14 +1405,14 @@ function testDateTimeOutParams(int time, int date, int timestamp, string jdbcUrl
     sql:Parameter para8 = { sqlType: sql:TYPE_TIMESTAMP, direction: sql:DIRECTION_OUT };
     sql:Parameter para9 = { sqlType: sql:TYPE_DATETIME, direction: sql:DIRECTION_OUT };
 
-    sql:Parameter[] parameters = [para1, para2, para3, para4, para5, para6, para7, para8, para9];
+    sql:Parameter?[] parameters = [para1, para2, para3, para4, para5, para6, para7, para8, para9];
 
     _ = testDB->call("{call TestDateTimeOutParams(?,?,?,?,?,?,?,?,?)}", (),
         para1, para2, para3, para4, para5, para6, para7, para8, para9);
 
     var dt = testDB->select("SELECT count(*) as countval from DateTimeTypes where row_id = 10", ResultCount);
     int count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return count;
 }
 
@@ -1432,7 +1426,7 @@ function testStructOutParameters(string jdbcUrl, string userName, string passwor
 
     sql:Parameter para1 = { sqlType: sql:TYPE_STRUCT, direction: sql:DIRECTION_OUT };
     _ = testDB->call("{call TestStructOut(?)}", (), para1);
-    testDB.stop();
+    _ = testDB.stop();
     return para1.value;
 }
 
@@ -1466,7 +1460,7 @@ function testComplexTypeRetrieval(string jdbcUrl, string userName, string passwo
     j = getJsonConversionResult(dt4);
     s4 = io:sprintf("%s", j);
 
-    testDB.stop();
+    _ = testDB.stop();
     return (s1, s2, s3, s4);
 }
 
@@ -1503,7 +1497,7 @@ function testSelectLoadToMemory(string jdbcUrl, string userName, string password
             i += 1;
         }
     }
-    testDB.stop();
+    _ = testDB.stop();
     return (fullNameArray1, fullNameArray2, fullNameArray3);
 }
 
@@ -1532,11 +1526,11 @@ function testLoadToMemorySelectAfterTableClose(string jdbcUrl, string userName, 
 
         if (ret is CustomerFullName[]) {
             fullNameArray3 = ret;
-        } else if (ret is error) {
+        } else {
             e = ret;
         }
     }
-    testDB.stop();
+    _ = testDB.stop();
     return (fullNameArray1, fullNameArray2, e);
 }
 
@@ -1560,13 +1554,13 @@ function testCloseConnectionPool(string jdbcUrl, string userName, string passwor
     });
     var dt = testDB->select(connectionCountQuery, ResultCount);
     int count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return count;
 }
 
-function getIntResult(int|error result) returns int {
-    if (result is int) {
-        return result;
+function getIntResult(sql:UpdateResult|error result) returns int {
+    if (result is sql:UpdateResult) {
+        return result.updatedRowCount;
     }
     return -1;
 }
@@ -1612,10 +1606,10 @@ function getJsonConversionResult(table<record {}>|error tableOrError) returns js
         var jsonConversionResult = json.convert(tableOrError);
         if (jsonConversionResult is json) {
             retVal = jsonConversionResult;
-        } else if (jsonConversionResult is error) {
+        } else {
             retVal = {"Error" : <string>jsonConversionResult.detail().message};
         }
-    } else if (tableOrError is error) {
+    } else {
         retVal = {"Error" : <string>tableOrError.detail().message};
     }
     return retVal;
@@ -1627,11 +1621,11 @@ function getXMLConversionResult(table<record {}>|error tableOrError) returns xml
         var xmlConversionResult = xml.convert(tableOrError);
         if (xmlConversionResult is xml) {
             retVal = xmlConversionResult;
-        } else if (xmlConversionResult is error) {
+        } else {
             string errorXML = <string>xmlConversionResult.detail().message;
             retVal = xml `<Error>{{errorXML}}</Error>`;
         }
-    } else if (tableOrError is error) {
+    } else {
         string errorXML = <string>tableOrError.detail().message;
         retVal = xml `<Error>{{errorXML}}</Error>`;
     }

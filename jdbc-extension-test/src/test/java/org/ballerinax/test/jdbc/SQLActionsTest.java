@@ -20,6 +20,7 @@ import org.ballerinalang.launcher.util.BCompileUtil;
 import org.ballerinalang.launcher.util.BRunUtil;
 import org.ballerinalang.launcher.util.CompileResult;
 import org.ballerinalang.model.values.BBoolean;
+import org.ballerinalang.model.values.BDecimal;
 import org.ballerinalang.model.values.BFloat;
 import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BString;
@@ -124,8 +125,8 @@ public class SQLActionsTest {
     @Test(groups = CONNECTOR_TEST)
     public void testGeneratedKeyOnInsert() {
         BValue[] returns = BRunUtil.invoke(result, "testGeneratedKeyOnInsert", connectionArgs);
-        BString retValue = (BString) returns[0];
-        Assert.assertTrue(Integer.parseInt(retValue.stringValue()) > 0);
+        Assert.assertEquals(((BInteger) returns[0]).intValue(), 1);
+        Assert.assertTrue(((BInteger) returns[1]).intValue() > 0);
     }
 
     @Test(groups = CONNECTOR_TEST)
@@ -141,8 +142,8 @@ public class SQLActionsTest {
     @Test(groups = CONNECTOR_TEST)
     public void testGeneratedKeyWithColumn() {
         BValue[] returns = BRunUtil.invoke(result, "testGeneratedKeyWithColumn", connectionArgs);
-        BString retValue = (BString) returns[0];
-        Assert.assertTrue(Integer.parseInt(retValue.stringValue()) > 0);
+        BInteger retValue = (BInteger) returns[0];
+        Assert.assertTrue(retValue.intValue() > 0);
     }
 
     @Test(groups = CONNECTOR_TEST)
@@ -371,8 +372,8 @@ public class SQLActionsTest {
         Assert.assertEquals(((BFloat) returns[2]).floatValue(), 123.34D, DELTA);
         Assert.assertEquals(((BFloat) returns[3]).floatValue(), 2139095039.1D);
         Assert.assertEquals(returns[5].stringValue(), "Hello");
-        Assert.assertEquals(((BFloat) returns[6]).floatValue(), 1234.567D);
-        Assert.assertEquals(((BFloat) returns[7]).floatValue(), 1234.567D);
+        Assert.assertEquals(((BDecimal) returns[6]).floatValue(), 1234.567D);
+        Assert.assertEquals(((BDecimal) returns[7]).floatValue(), 1234.567D);
         Assert.assertEquals(((BFloat) returns[8]).floatValue(), 1234.567D, DELTA);
     }
 
@@ -384,8 +385,8 @@ public class SQLActionsTest {
         Assert.assertEquals(((BFloat) returns[2]).floatValue(), 123.34D, DELTA);
         Assert.assertEquals(((BFloat) returns[3]).floatValue(), 2139095039.1D);
         Assert.assertEquals(returns[5].stringValue(), "Hello");
-        Assert.assertEquals(((BFloat) returns[6]).floatValue(), 1234.567D);
-        Assert.assertEquals(((BFloat) returns[7]).floatValue(), 1234.567D);
+        Assert.assertEquals(((BDecimal) returns[6]).floatValue(), 1234.567D);
+        Assert.assertEquals(((BDecimal) returns[7]).floatValue(), 1234.567D);
         Assert.assertEquals(((BFloat) returns[8]).floatValue(), 1234.567D, DELTA);
     }
 
@@ -732,7 +733,7 @@ public class SQLActionsTest {
     @Test(groups = CONNECTOR_TEST, description = "Test failed update with generated id action")
     public void testFailedGeneratedKeyOnInsert() {
         BValue[] returns = BRunUtil.invoke(resultNegative, "testGeneratedKeyOnInsert", connectionArgs);
-        Assert.assertTrue(returns[0].stringValue().contains("execute update with generated keys failed:"));
+        Assert.assertTrue(returns[0].stringValue().contains("execute update failed:"));
     }
 
     @Test(groups = {CONNECTOR_TEST, H2_NOT_SUPPORTED}, description = "Test failed call procedure")
