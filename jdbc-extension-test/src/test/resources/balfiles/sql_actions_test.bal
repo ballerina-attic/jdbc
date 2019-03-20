@@ -663,7 +663,7 @@ function testNullOutParameters(string jdbcUrl, string userName, string password)
         paraClob = { sqlType: sql:TYPE_VARCHAR, direction: sql:DIRECTION_OUT };
         // In postgres FLOAT with no precision represents DOUBLE
         // float(1) to float(24) means REAL
-        // float(25) to float(53) means testCallProceduredouble precision
+        // float(25) to float(53) means test double precision
         // Therefore to get the OUT param right, it is required to use "REAL" type
         paraFloat = { sqlType: sql:TYPE_REAL, direction: sql:DIRECTION_OUT };
         // There is no TINYINT in postgres, hence using SMALLINT instead

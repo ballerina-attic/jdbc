@@ -55,8 +55,6 @@ function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string passwo
     });
 
     int|string ret = "";
-    string[] generatedID = [];
-    int insertCount;
     var x = testDB->update("insert into Customers (name,lastName,
             registrationID,creditLimit,country) values ('Mary', 'Williams', 3, 5000.75, 'USA')");
     if (x is sql:UpdateResult) {
