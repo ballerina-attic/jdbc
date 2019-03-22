@@ -42,11 +42,11 @@ function testSelectData(string jdbcUrl, string userName, string password) return
     var x = testDB->select("SELECT Name from Customers where registrationID = 1", ());
     json j = getJsonConversionResult(x);
     returnData = io:sprintf("%s", j);
-    testDB.stop();
+    _ = testDB.stop();
     return returnData;
 }
 
-function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string password) returns (string) {
+function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string password) returns int|string {
     jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
@@ -54,18 +54,15 @@ function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string passwo
         poolOptions: { maximumPoolSize: 1 }
     });
 
-    string ret = "";
-    string[] generatedID = [];
-    int insertCount;
-    var x = testDB->updateWithGeneratedKeys("insert into Customers (name,lastName,
-                             registrationID,creditLimit,country) values ('Mary', 'Williams', 3, 5000.75, 'USA')", ());
-    if (x is (int, string[])) {
-        (_, generatedID) = x;
-        ret = generatedID[0];
-    } else if (x is error) {
-        ret = <string> x.detail().message;
+    int|string ret = "";
+    var x = testDB->update("insert into Customers (name,lastName,
+            registrationID,creditLimit,country) values ('Mary', 'Williams', 3, 5000.75, 'USA')");
+    if (x is sql:UpdateResult) {
+        ret = x.generatedKeys.length();
+    } else {
+        ret = string.convert(x.detail().message);
     }
-    testDB.stop();
+    _ = testDB.stop();
     return ret;
 }
 
@@ -83,15 +80,15 @@ function testCallProcedure(string jdbcUrl, string userName, string password) ret
         var j = json.convert(x[0]);
         if (j is json) {
             returnData = io:sprintf("%s", j);
-        } else if (j is error) {
+        } else {
             returnData = j.reason();
         }
     } else if (x is ()) {
         returnData = "";
-    } else if (x is error) {
+    } else {
         returnData = <string>x.detail().message;
     }
-    testDB.stop();
+    _ = testDB.stop();
     return returnData;
 }
 
@@ -111,7 +108,7 @@ function testBatchUpdate(string jdbcUrl, string userName, string password) retur
     sql:Parameter para3 = { sqlType: sql:TYPE_INTEGER, value: 20 };
     sql:Parameter para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     sql:Parameter para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters1 = [para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters1 = [para1, para2, para3, para4, para5];
 
     //Batch 2
     para1 = { sqlType: sql:TYPE_VARCHAR, value: "Alex" };
@@ -119,7 +116,7 @@ function testBatchUpdate(string jdbcUrl, string userName, string password) retur
     para3 = { sqlType: sql:TYPE_INTEGER, value: 20 };
     para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters2 = [para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters2 = [para1, para2, para3, para4, para5];
 
     var x = trap testDB->batchUpdate("Insert into CustData (firstName,lastName,registrationID,creditLimit,country)
                                      values (?,?,?,?,?)", parameters1, parameters2);
@@ -130,10 +127,10 @@ function testBatchUpdate(string jdbcUrl, string userName, string password) retur
         } else {
             returnVal = "success";
         }
-    } else if (x is error) {
+    } else {
         returnVal = <string> x.detail().message;
     }
-    testDB.stop();
+    _ = testDB.stop();
     return returnVal;
 }
 
@@ -159,10 +156,10 @@ function testInvalidArrayofQueryParameters(string jdbcUrl, string userName, stri
         } else {
             returnData = j.reason();
         }
-    } else if (x is error) {
+    } else {
         returnData = <string>x.detail().message;
     }
-    testDB.stop();
+    _ = testDB.stop();
     return returnData;
 }
 
@@ -195,10 +192,10 @@ function testCallProcedureWithMultipleResultSetsAndLowerConstraintCount(string j
         retVal = (firstName1, firstName2);
     } else if (ret is ()) {
         retVal = ("", "");
-    } else if (ret is error) {
+    } else {
         retVal = ret;
     }
-    testDB.stop();
+    _ = testDB.stop();
     return retVal;
 }
 
@@ -232,10 +229,10 @@ function testCallProcedureWithMultipleResultSetsAndHigherConstraintCount(string 
         retVal = (firstName1, firstName2);
     } else if (ret is ()) {
         retVal = ("", "");
-    } else if (ret is error) {
+    } else {
         retVal = ret;
     }
-    testDB.stop();
+    _ = testDB.stop();
     return retVal;
 }
 
@@ -268,10 +265,10 @@ function testCallProcedureWithMultipleResultSetsAndNilConstraintCount(string jdb
         retVal = (firstName1, firstName2);
     } else if (ret is ()) {
         retVal = "nil";
-    } else if (ret is error) {
+    } else {
         retVal = ret;
     }
-    testDB.stop();
+    _ = testDB.stop();
     return retVal;
 }
 
@@ -281,10 +278,10 @@ function getJsonConversionResult(table<record {}>|error tableOrError) returns js
         var jsonConversionResult = json.convert(tableOrError);
         if (jsonConversionResult is json) {
             retVal = jsonConversionResult;
-        } else if (jsonConversionResult is error) {
+        } else {
             retVal = {"Error" : <string>jsonConversionResult.detail().message};
         }
-    } else if (tableOrError is error) {
+    } else {
         retVal = {"Error" : <string>tableOrError.detail().message};
     }
     return retVal;

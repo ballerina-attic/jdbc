@@ -50,7 +50,7 @@ function testLocalTransaction() returns (int, int, boolean, boolean) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 200", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count, committedBlockExecuted, abortedBlockExecuted);
 }
 
@@ -78,7 +78,7 @@ function testTransactionRollback() returns (int, int, boolean) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 210", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count, stmtAfterFailureExecuted);
 }
 
@@ -92,10 +92,10 @@ function testLocalTransactionUpdateWithGeneratedKeys() returns (int, int) {
     int returnVal = 0;
     int count;
     transaction {
-        _ = testDB->updateWithGeneratedKeys("Insert into Customers
-        (firstName,lastName,registrationID,creditLimit,country) values ('James', 'Clerk', 615, 5000.75, 'USA')", ());
-        _ = testDB->updateWithGeneratedKeys("Insert into Customers
-        (firstName,lastName,registrationID,creditLimit,country) values ('James', 'Clerk', 615, 5000.75, 'USA')", ());
+        _ = testDB->update("Insert into Customers
+        (firstName,lastName,registrationID,creditLimit,country) values ('James', 'Clerk', 615, 5000.75, 'USA')");
+        _ = testDB->update("Insert into Customers
+        (firstName,lastName,registrationID,creditLimit,country) values ('James', 'Clerk', 615, 5000.75, 'USA')");
     } onretry {
         returnVal = -1;
     }
@@ -103,7 +103,7 @@ function testLocalTransactionUpdateWithGeneratedKeys() returns (int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 615", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -118,19 +118,18 @@ function testTransactionRollbackUpdateWithGeneratedKeys() returns (int, int) {
     int count;
 
     transaction {
-        _ = testDB->updateWithGeneratedKeys("Insert into Customers (firstName,lastName,registrationID,
-                creditLimit,country) values ('James', 'Clerk', 618, 5000.75, 'USA')", ());
-        _ = testDB->updateWithGeneratedKeys("Insert into Customers2 (firstName,lastName,registrationID,
-                creditLimit,country) values ('James', 'Clerk', 618, 5000.75, 'USA')", ());
+        _ = testDB->update("Insert into Customers (firstName,lastName,registrationID,
+                creditLimit,country) values ('James', 'Clerk', 618, 5000.75, 'USA')");
+        _ = testDB->update("Insert into Customers2 (firstName,lastName,registrationID,
+                creditLimit,country) values ('James', 'Clerk', 618, 5000.75, 'USA')");
     } onretry {
         returnVal = -1;
     }
     //check whether update action is performed
-    var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 618", ResultCount
-    );
+    var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 618", ResultCount);
 
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -154,7 +153,7 @@ function testLocalTransactionStoredProcedure() returns (int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 628", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -187,7 +186,7 @@ function testLocalTransactionRollbackStoredProcedure() returns (int, int, int, i
     count1 = getTableCountValColumn(dt1);
     count2 = getTableCountValColumn(dt2);
     count3 = getTableCountValColumn(dt3);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count1, count2, count3);
 }
 
@@ -207,7 +206,7 @@ function testLocalTransactionBatchUpdate() returns (int, int) {
     sql:Parameter para3 = { sqlType: sql:TYPE_INTEGER, value: 611 };
     sql:Parameter para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     sql:Parameter para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters1 = [para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters1 = [para1, para2, para3, para4, para5];
 
     //Batch 2
     para1 = { sqlType: sql:TYPE_VARCHAR, value: "Alex" };
@@ -215,7 +214,7 @@ function testLocalTransactionBatchUpdate() returns (int, int) {
     para3 = { sqlType: sql:TYPE_INTEGER, value: 611 };
     para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters2 = [para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters2 = [para1, para2, para3, para4, para5];
 
     transaction {
         _= testDB->batchUpdate("Insert into Customers
@@ -229,7 +228,7 @@ function testLocalTransactionBatchUpdate() returns (int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 611", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -249,7 +248,7 @@ function testLocalTransactionRollbackBatchUpdate() returns (int, int) {
     sql:Parameter para3 = { sqlType: sql:TYPE_INTEGER, value: 612 };
     sql:Parameter para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     sql:Parameter para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters1 = [para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters1 = [para1, para2, para3, para4, para5];
 
     //Batch 2
     para1 = { sqlType: sql:TYPE_VARCHAR, value: "Alex" };
@@ -257,7 +256,7 @@ function testLocalTransactionRollbackBatchUpdate() returns (int, int) {
     para3 = { sqlType: sql:TYPE_INTEGER, value: 612 };
     para4 = { sqlType: sql:TYPE_DOUBLE, value: 3400.5 };
     para5 = { sqlType: sql:TYPE_VARCHAR, value: "Colombo" };
-    sql:Parameter[] parameters2 = [para1, para2, para3, para4, para5];
+    sql:Parameter?[] parameters2 = [para1, para2, para3, para4, para5];
 
     transaction {
         _ = testDB->batchUpdate("Insert into Customers
@@ -271,7 +270,7 @@ function testLocalTransactionRollbackBatchUpdate() returns (int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 612", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -302,7 +301,7 @@ function testTransactionAbort() returns (int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 220", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -325,7 +324,7 @@ function testTransactionErrorPanic() returns (int, int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 260", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (testTransactionErrorPanicRetVal, catchValue, count);
 }
 
@@ -368,7 +367,7 @@ function testTransactionErrorPanicAndTrap() returns (int, int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 250", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, catchValue, count);
 }
 
@@ -400,7 +399,7 @@ function testTransactionCommitted() returns (int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 300", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -435,7 +434,7 @@ function testTwoTransactions() returns (int, int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 400", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal1, returnVal2, count);
 }
 
@@ -458,7 +457,7 @@ function testTransactionWithoutHandlers() returns (int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 350", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return count;
 }
 
@@ -481,7 +480,7 @@ function testLocalTransactionFailed() returns (string, int) {
     a = a + " afterTrx";
     var dtRet = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 111", ResultCount);
     count = getTableCountValColumn(dtRet);
-    testDB.stop();
+    _ = testDB.stop();
     return (a, count);
 }
 
@@ -519,7 +518,7 @@ function testLocalTransactionSuccessWithFailed() returns (string, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 222", ResultCount
     );
     int count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (a, count);
 }
 
@@ -568,12 +567,12 @@ function testLocalTransactionFailedWithNextupdate() returns (int) {
     }
     _ = testDB1->update("Insert into Customers (firstName,lastName,registrationID,creditLimit,country)
                             values ('James', 'Clerk', 12343, 5000.75, 'USA')");
-    testDB1.stop();
+    _ = testDB1.stop();
 
     var dt = testDB2->select("Select COUNT(*) as countval from Customers where registrationID = 12343",
         ResultCount);
     i = getTableCountValColumn(dt);
-    testDB2.stop();
+    _ = testDB2.stop();
     return i;
 }
 
@@ -604,7 +603,7 @@ function testNestedTwoLevelTransactionSuccess() returns (int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 333", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -634,7 +633,7 @@ function testNestedThreeLevelTransactionSuccess() returns (int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 444", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -668,7 +667,7 @@ function testNestedThreeLevelTransactionFailed() returns (int, int) {
     var dt = testDB->select("Select COUNT(*) as countval from Customers where registrationID = 555", ResultCount
     );
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -736,7 +735,7 @@ function testLocalTransactionWithSelectAndForeachIteration() returns (int, int) 
     } onretry {
         returnVal = -1;
     }
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -764,7 +763,7 @@ function testLocalTransactionWithSelectAndHasNextIteration() returns (int, int) 
     } onretry {
         returnVal = -1;
     }
-    testDB.stop();
+    _ = testDB.stop();
     return (returnVal, count);
 }
 
@@ -778,7 +777,7 @@ function testCloseConnectionPool() returns (int) {
     int count;
     var dt = testDB->select("SELECT COUNT(*) as countVal FROM INFORMATION_SCHEMA.SYSTEM_SESSIONS", ResultCount);
     count = getTableCountValColumn(dt);
-    testDB.stop();
+    _ = testDB.stop();
     return count;
 }
 
