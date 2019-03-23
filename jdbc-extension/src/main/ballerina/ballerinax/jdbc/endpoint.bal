@@ -43,7 +43,7 @@ public type Client client object {
 
     # Gets called when the JDBC client is instantiated.
     public function __init(ClientEndpointConfig c) {
-        self.sqlClient = createClient(c, sql:globalPoolConfigContainer.getGlobalPoolConfig());
+        self.sqlClient = createClient(c, sql:getGlobalPoolConfigContainer().getGlobalPoolConfig());
     }
 
     # The call remote function implementation for JDBC Client to invoke stored procedures/functions.
