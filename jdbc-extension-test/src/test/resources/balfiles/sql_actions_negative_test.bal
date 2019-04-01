@@ -42,7 +42,7 @@ function testSelectData(string jdbcUrl, string userName, string password) return
     var x = testDB->select("SELECT Name from Customers where registrationID = 1", ());
     json j = getJsonConversionResult(x);
     returnData = io:sprintf("%s", j);
-    _ = testDB.stop();
+    error? stopRet = testDB.stop();
     return returnData;
 }
 
@@ -60,9 +60,10 @@ function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string passwo
     if (x is sql:UpdateResult) {
         ret = x.generatedKeys.length();
     } else {
-        ret = string.convert(x.detail().message);
+        anydata|error errorMessage = x.detail().message;
+        ret = string.convert(errorMessage is anydata ? <string>errorMessage : "Error trace continues");
     }
-    _ = testDB.stop();
+    error? stopRet = testDB.stop();
     return ret;
 }
 
@@ -88,7 +89,7 @@ function testCallProcedure(string jdbcUrl, string userName, string password) ret
     } else {
         returnData = <string>x.detail().message;
     }
-    _ = testDB.stop();
+    error? stopRet = testDB.stop();
     return returnData;
 }
 
@@ -130,7 +131,7 @@ function testBatchUpdate(string jdbcUrl, string userName, string password) retur
     } else {
         returnVal = <string> x.detail().message;
     }
-    _ = testDB.stop();
+    error? stopRet = testDB.stop();
     return returnVal;
 }
 
@@ -159,7 +160,7 @@ function testInvalidArrayofQueryParameters(string jdbcUrl, string userName, stri
     } else {
         returnData = <string>x.detail().message;
     }
-    _ = testDB.stop();
+    error? stopRet = testDB.stop();
     return returnData;
 }
 
@@ -195,7 +196,7 @@ function testCallProcedureWithMultipleResultSetsAndLowerConstraintCount(string j
     } else {
         retVal = ret;
     }
-    _ = testDB.stop();
+    error? stopRet = testDB.stop();
     return retVal;
 }
 
@@ -232,7 +233,7 @@ function testCallProcedureWithMultipleResultSetsAndHigherConstraintCount(string 
     } else {
         retVal = ret;
     }
-    _ = testDB.stop();
+    error? stopRet = testDB.stop();
     return retVal;
 }
 
@@ -268,7 +269,7 @@ function testCallProcedureWithMultipleResultSetsAndNilConstraintCount(string jdb
     } else {
         retVal = ret;
     }
-    _ = testDB.stop();
+    error? stopRet = testDB.stop();
     return retVal;
 }
 
