@@ -60,7 +60,8 @@ function testGeneratedKeyOnInsert(string jdbcUrl, string userName, string passwo
     if (x is sql:UpdateResult) {
         ret = x.generatedKeys.length();
     } else {
-        ret = string.convert(x.detail().message);
+        anydata|error errorMessage = x.detail().message;
+        ret = string.convert(errorMessage is anydata ? <string>errorMessage : "Error trace continues");
     }
     error? stopRet = testDB.stop();
     return ret;
