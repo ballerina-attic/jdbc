@@ -67,11 +67,11 @@ public function main() {
     ret = testDB->update("DELETE FROM student WHERE age = ?", 24);
     handleUpdate(ret, "Delete a row from student table");
 
-    // Column values generated during the update can be retrieved using the
-    // `update` remote function. If the table has several auto
-    // generated columns other than the auto incremented key, those column
-    // names should be given as an array. The values of the auto incremented
-    // column and the auto generated columns are returned as a `string` array.
+    // THe column values generated during the update can be retrieved using the
+    // `update` remote function. If the table has several auto-generated
+    // columns other than the auto-incremented key, those column names
+    // should be given as an array. The values of the auto-incremented
+    // column and the auto-generated columns are returned as a `string` array.
     // Similar to the `update` remote function, the inserted row count is also
     // returned.
     io:println("\nThe Update operation - Inserting data");
@@ -138,7 +138,7 @@ public function main() {
     handleUpdate(ret, "Drop table student");
 }
 
-// Function to handle return value of the `update` remote function.
+// Function to handle the return value of the `update` remote function.
 function handleUpdate(sql:UpdateResult|error returned, string message) {
     if (returned is sql:UpdateResult) {
         io:println(message + " status: " + returned.updatedRowCount);

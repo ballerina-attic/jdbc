@@ -92,7 +92,7 @@ public function main() {
     handleUpdate(ret, "Drop stored procedure GETCOUNT");
 }
 
-// Function to handle return value of the `update` remote function.
+// Function to handle the return value of the `update` remote function.
 function handleUpdate(sql:UpdateResult|error returned, string message) {
     if (returned is sql:UpdateResult) {
         io:println(message + " status: " + returned.updatedRowCount);

@@ -9,7 +9,7 @@ public function main() {
             password: "test"
         });
 
-    // Create table for data insertion.
+    // Create a table for data insertion.
     var ret = testDB->update("CREATE TABLE Data (id INT, field1
         VARCHAR(1024), field2 VARCHAR(1024));");
     handleUpdate(ret, "Create Data table");
@@ -44,7 +44,7 @@ public function main() {
     }
 }
 
-// Function to handle return value of the update remote function.
+// Function to handle the return value of the update remote function.
 function handleUpdate(sql:UpdateResult|error returned, string message) {
     if (returned is sql:UpdateResult) {
         io:println(message + " status: " + returned.updatedRowCount);

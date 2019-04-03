@@ -2,7 +2,7 @@ import ballerina/io;
 import ballerina/sql;
 import ballerinax/jdbc;
 
-// Client for MySQL database. This client can be used with any JDBC
+// Client for the MySQL database. This client can be used with any JDBC
 // supported database by providing the corresponding JDBC URL.
 jdbc:Client testDB = new({
         url: "jdbc:mysql://localhost:3306/testdb",
@@ -77,7 +77,7 @@ public function main() {
     handleUpdate(ret, "Drop table student");
 }
 
-// Function to handle return value of the `update` remote function.
+// Function to handle the return value of the `update` remote function.
 function handleUpdate(sql:UpdateResult|error returned, string message) {
     if (returned is sql:UpdateResult) {
         io:println(message + " status: " + returned.updatedRowCount);
