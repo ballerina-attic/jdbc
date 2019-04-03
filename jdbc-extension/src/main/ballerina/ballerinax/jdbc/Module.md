@@ -4,10 +4,76 @@ This module provides the functionality required to access and manipulate data st
 
 ### Client
 
-To access a database, you must first create a `client` object. Create a client of the JDBC Client type (i.e., `jdbc:Client`) and provide the necessary connection parameters. This will create a pool of connections to the given database. A sample for creating a JDBC client can be found below.
+To access a database, you must first create a `client` object. A sample for creating a JDBC client can be found below.
 
 **NOTE**: Although the JDBC client type supports connecting to any type of relational database that is accessible via JDBC, if you are using a MySQL or H2 database, it is recommended to use clients that are created using the client types specific to them via the relevant Ballerina modules.
 
+### Connection pool handling
+
+There are 3 possible scenarios for connection pool handling.
+
+1. Global, shareable default connection pool
+If you do not provide the `poolOptions` field, a globally shareable pool will be created for your database unless
+a connection pool matching with the properties you provided already exists.
+
+```ballerina
+jdbc:Client testDB = new({
+    url: "jdbc:mysql://localhost:3306/testdb",
+    username: "root",
+    password: "root",
+    dbOptions: { useSSL: false }
+});
+```
+
+2. Client owned, unshareable connection pool
+If you define the `poolOptions` field inline, an unshareable connection pool will be created.
+
+```ballerina
+jdbc:Client testDB = new({
+    url: "jdbc:mysql://localhost:3306/testdb",
+    username: "root",
+    password: "root",
+    poolOptions: { maximumPoolSize: 5 },
+    dbOptions: { useSSL: false }
+});
+```
+
+3. Local shareable connection pool
+If you create a record of type `sql:PoolOptions` and reuse that in the configuration of multiple clients, for each
+set of clients that connect to the same database instance with the same set of properties, a shared connection pool
+will be created.
+
+```ballerina
+jdbc:Client testDB1;
+jdbc:Client testDB2;
+jdbc:Client testDB3;
+
+sql:PoolOptions poolOptions1 = { maximumPoolSize: 5 };
+
+testDB1 = new({
+    url: "jdbc:mysql://localhost:3306/testdb1",
+    username: "root",
+    password: "root",
+    poolOptions: poolOptions1,
+    dbOptions: { useSSL: false }
+});
+
+testDB2 = new({
+    url: "jdbc:mysql://localhost:3306/testdb1",
+    username: "root",
+    password: "root",
+    poolOptions: poolOptions1,
+    dbOptions: { useSSL: false }
+});
+
+testDB3 = new({
+    url: "jdbc:mysql://localhost:3306/testdb2",
+    username: "root",
+    password: "root",
+    poolOptions: poolOptions1,
+    dbOptions: { useSSL: false }
+});
+```
 ### Database operations
 
 Once the client is created, database operations can be executed through that client. This module provides support for creating tables and executing stored procedures. It also supports selecting, inserting, deleting, updating, and batch updating data. Samples for these operations can be found below. Details of the SQL data types and query parameters relevant for these database operations can be found in the documentation for the SQL module.
@@ -21,23 +87,24 @@ jdbc:Client testDB = new({
     url: "jdbc:mysql://localhost:3306/testdb",
     username: "root",
     password: "root",
-    poolOptions: { maximumPoolSize: 5 },
     dbOptions: { useSSL: false }
 });
 ```
-The full list of client properties can be found listed under the `sql:PoolOptions` type, which is located in the `types.bal` file of the SQL module directory.
+The full list of client properties can be found listed under the `sql:PoolOptions` type, which is located in the
+`types.bal` file of the SQL module directory.
 
 ### Creating tables
 
-This sample creates a table with two columns. One column is of type `int`, and the other is of type `varchar`. The CREATE statement is executed via the `update` remote function of the client.
+This sample creates a table with two columns. One column is of type `int`, and the other is of type `varchar`.
+The CREATE statement is executed via the `update` remote function of the client.
 
 ```ballerina
 // Create the ‘Students’ table with fields ‘id’, 'name' and ‘age’.
 var returned = testDB->update("CREATE TABLE student(id INT AUTO_INCREMENT, age INT, name VARCHAR(255), PRIMARY KEY (id))");
-if (returned is int) {
-    io:println("Students table create status in DB: " + returned);
-} else if (returned is error) {
-    io:println("Students table create failed: " + <string>returned.detail().message);
+if (returned is sql:UpdateResult) {
+    io:println("Students table create status in DB: " + returned.updatedRowCount);
+} else {
+    io:println("Students table creation failed: " + <string>returned.detail().message);
 }
 ```
 
@@ -49,9 +116,9 @@ In the first example, query parameter values are passed directly into the query 
 
 ```ballerina
 var returned = testDB->update("INSERT INTO student(age, name) values (23, 'john')");
-if (returned is int) {
-    io:println("Inserted row count to Students table: " + returned);
-} else if (returned is error) {
+if (returned is sql:UpdateResult) {
+    io:println("Inserted row count to Students table: " + returned.updatedRowCount);
+} else {
     io:println("Insert to Students table failed: " + <string>returned.detail().message);
 }
 ```
@@ -62,9 +129,9 @@ In the second example, the parameter values, which are in local variables, are p
 string name = "Anne";
 int age = 8;
 var returned = testDB->update("INSERT INTO student(age, name) values (?, ?)", age, name);
-if (returned is int) {
-    io:println("Inserted row count to Students table: " + returned);
-} else if (returned is error) {
+if (returned is sql:UpdateResult) {
+    io:println("Inserted row count to Students table: " + returned.updatedRowCount);
+} else {
     io:println("Insert to Students table failed: " + <string>returned.detail().message);
 }
 ```
@@ -74,27 +141,28 @@ In the third example, parameter values are passed as an `sql:Parameter` to the `
 ```ballerina
 sql:Parameter p1 = { sqlType: sql:TYPE_VARCHAR, value: "James" };
 sql:Parameter p2 = { sqlType: sql:TYPE_INTEGER, value: 10 };
-var returned = testDB->update("INSERT INTO student(age, name) values (?, ?)", p1, p2);
-if (returned is int) {
-    io:println("Inserted row count to Students table: " + returned);
-} else if (returned is error) {
+var returned = testDB->update("INSERT INTO student(age, name) values (?, ?)", p2, p1);
+if (returned is sql:UpdateResult) {
+    io:println("Inserted row count to Students table: " + returned.updatedRowCount);
+} else {
     io:println("Insert to Students table failed: " + <string>returned.detail().message);
 }
 ```
 
 ### Inserting data with auto-generated keys
 
-This example demonstrates inserting data while returning the auto-generated keys. It achieves this by using the `updateWithGeneratedKeys` remote function to execute the INSERT statement.
+This example demonstrates inserting data while returning the auto-generated keys. It achieves this by using the `update` remote function to execute the INSERT statement.
 
 ```ballerina
 int age = 31;
 string name = "Kate";
-var retWithKey = testDB->updateWithGeneratedKeys("INSERT INTO student (age, name) values (?, ?)", (), age, name);
-if (retWithKey is (int, string[])) {
-    var (count, ids) = retWithKey;
+var retWithKey = testDB->update("INSERT INTO student (age, name) values (?, ?)", age, name);
+if (retWithKey is sql:UpdateResult) {
+    int count = retWithKey.updatedRowCount;
+    int generatedKey = <int>retWithKey.generatedKeys.GENERATED_KEY;
     io:println("Inserted row count: " + count);
-    io:println("Generated key: " + ids[0]);
-} else if (retWithKey is error) {
+    io:println("Generated key: " + generatedKey);
+} else {
     io:println("Insert to table failed: " + <string>retWithKey.detail().message);
 }
 ```
@@ -118,7 +186,7 @@ if (selectRet is table<Student>) {
     foreach var row in selectRet {
         io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
     }
-} else if (selectRet is error) {
+} else {
     io:println("Select data from student table failed: " + <string>selectRet.detail().message);
 }
 ```
@@ -136,7 +204,7 @@ if (selectRet is table<Student>) {
     foreach var row in selectRet {
         io:println("Student:" + row.id + "|" + row.name + "|" + row.age);
     }
-} else if (selectRet is error) {
+} else {
     io:println("Select data from student table failed: " + <string>selectRet.detail().message);
 }
 ````
@@ -146,10 +214,10 @@ if (selectRet is table<Student>) {
 This example demonstrates modifying data by executing an UPDATE statement via the `update` remote function of the client
 ```ballerina
 var returned = testDB->update("UPDATE student SET name = 'Jones' WHERE age = ?", 23);
-if (returned is int) {
-    io:println("Updated row count in Students table: " + returned);
-} else if (returned is error) {
-    io:println("Update in Students table failed: " + <string>returned.detail().message);
+if (returned is sql:UpdateResult) {
+    io:println("Updated row count in Students table: " + returned.updatedRowCount);
+} else {
+    io:println("Insert to Students table failed: " + <string>returned.detail().message);
 }
 ```
 
@@ -173,7 +241,7 @@ var retBatch = testDB->batchUpdate("INSERT INTO Students(name, age) values (?, ?
 if (retBatch is int[]) {
     io:println("Batch item 1 update count: " + retBatch[0]);
     io:println("Batch item 2 update count: " + retBatch[1]);
-} else if (retBatch is error) {
+} else {
     io:println("Batch update operation failed: " + <string>retBatch.detail().message);
 }
 ```
@@ -189,17 +257,17 @@ var returned = testDB->update("CREATE PROCEDURE INSERTDATA (IN pName VARCHAR(255
                            BEGIN
                               INSERT INTO Students(name, age) values (pName, pAge);
                            END");
-if (returned is int) {
-    io:println("Stored proc creation status: " + returned);
-} else if (returned is error) {
-    io:println("Stored procedure creation failed: " + <string>returned.detail().message);
+if (returned is sql:UpdateResult) {
+    io:println("Stored proc creation status: : " + returned.updatedRowCount);
+} else {
+    io:println("Stored proc creation failed: " + <string>returned.detail().message);
 }
 
 // Call the stored procedure.
 var retCall = testDB->call("{CALL INSERTDATA(?,?)}", (), "George", 15);
 if (retCall is ()|table<record {}>[]) {
     io:println("Call operation successful");
-} else if (retCall is error) {
+} else {
     io:println("Stored procedure call failed: " + <string>retCall.detail().message);
 }
 ```
@@ -212,10 +280,10 @@ var returned = testDB->update("CREATE PROCEDURE GETCOUNT (INOUT pID INT, OUT pCo
                                 SELECT COUNT(*) INTO pID FROM Students WHERE id = pID;
                                 SELECT COUNT(*) INTO pCount FROM Students WHERE id = 2;
                            END");
-if (returned is int) {
-    io:println("Stored proc creation status: " + returned);
-} else if (returned is error) {
-    io:println("Stored procedure creation failed: " + <string>returned.detail().message);
+if (returned is sql:UpdateResult) {
+    io:println("Stored proc creation status: : " + returned.updatedRowCount);
+} else {
+    io:println("Stored procedure creation failed:  " + <string>returned.detail().message);
 }
 
 // Call the stored procedure.
@@ -228,7 +296,7 @@ if (retCall is ()|table<record {}>[]) {
     io:println(param1.value);
     io:print("Student count with ID = 2: ");
     io:println(param2.value);
-} else if (retCall is error) {
+} else {
     io:println("Stored procedure call failed: " + <string>retCall.detail().message);
 }
 ```
