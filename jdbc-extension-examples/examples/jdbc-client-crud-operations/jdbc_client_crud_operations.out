@@ -15,7 +15,7 @@ Update a row in student table status: 1
 The Update operation - Delete data from table
 Delete a row from student table status: 1
 
-The updateWithGeneratedKeys operation - Inserting data
+The Update operation - Inserting data
 Inserted row count: 1
 Generated key: 4
 

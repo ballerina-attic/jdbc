@@ -1,4 +1,5 @@
 import ballerina/io;
+import ballerina/sql;
 import ballerinax/jdbc;
 
 // Client for MySQL database. This client can be used with any JDBC
@@ -18,7 +19,7 @@ type Student record {
     string name;
 };
 
-type myBatchType int|string;
+type myBatchType int|string?;
 
 public function main() {
     // Create a table using the `update` remote function. If the DDL
@@ -52,7 +53,7 @@ public function main() {
         string name = studentData.firstname.toString();
         int age = <int>studentData.age;
 
-        myBatchType[] dataRow = [age, name];
+        myBatchType?[] dataRow = [age, name];
         dataBatch[i] = dataRow;
         i = i + 1;
     }
@@ -77,9 +78,9 @@ public function main() {
 }
 
 // Function to handle return value of the `update` remote function.
-function handleUpdate(int|error returned, string message) {
-    if (returned is int) {
-        io:println(message + " status: " + returned);
+function handleUpdate(sql:UpdateResult|error returned, string message) {
+    if (returned is sql:UpdateResult) {
+        io:println(message + " status: " + returned.updatedRowCount);
     } else {
         io:println(message + " failed: " + <string>returned.detail().message);
     }

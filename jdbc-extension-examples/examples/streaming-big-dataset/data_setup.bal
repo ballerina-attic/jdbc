@@ -1,12 +1,12 @@
 import ballerina/io;
+import ballerina/sql;
 import ballerinax/jdbc;
 
 public function main() {
     jdbc:Client testDB = new({
             url: "jdbc:mysql://localhost:3306/StreamTestDB",
             username: "test",
-            password: "test",
-            poolOptions: { maximumPoolSize: 5 }
+            password: "test"
         });
 
     // Create table for data insertion.
@@ -45,9 +45,9 @@ public function main() {
 }
 
 // Function to handle return value of the update remote function.
-function handleUpdate(int|error returned, string message) {
-    if (returned is int) {
-        io:println(message + " status: " + returned);
+function handleUpdate(sql:UpdateResult|error returned, string message) {
+    if (returned is sql:UpdateResult) {
+        io:println(message + " status: " + returned.updatedRowCount);
     } else {
         io:println(message + " failed: " + <string>returned.detail().message);
     }
