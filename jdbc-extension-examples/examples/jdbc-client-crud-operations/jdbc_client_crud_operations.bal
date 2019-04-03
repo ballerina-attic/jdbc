@@ -67,22 +67,23 @@ public function main() {
     ret = testDB->update("DELETE FROM student WHERE age = ?", 24);
     handleUpdate(ret, "Delete a row from student table");
 
-    // Column values generated during the update can be retrieved using the
-    // `updateWithGeneratedKeys` remote function. If the table has several auto
-    // generated columns other than the auto incremented key, those column
-    // names should be given as an array. The values of the auto incremented
-    // column and the auto generated columns are returned as a `string` array.
+    // THe column values generated during the update can be retrieved using the
+    // `update` remote function. If the table has several auto-generated
+    // columns other than the auto-incremented key, those column names
+    // should be given as an array. The values of the auto-incremented
+    // column and the auto-generated columns are returned as a `string` array.
     // Similar to the `update` remote function, the inserted row count is also
     // returned.
-    io:println("\nThe updateWithGeneratedKeys operation - Inserting data");
+    io:println("\nThe Update operation - Inserting data");
     age = 31;
     name = "Kate";
-    var retWithKey = testDB->updateWithGeneratedKeys("INSERT INTO student
-                        (age, name) values (?, ?)", (), age, name);
-    if (retWithKey is (int, string[])) {
-        var (count, ids) = retWithKey;
+    var retWithKey = testDB->update("INSERT INTO student
+                        (age, name) values (?, ?)", age, name);
+    if (retWithKey is sql:UpdateResult) {
+        int count = retWithKey.updatedRowCount;
+        int generatedKey = <int>retWithKey.generatedKeys.GENERATED_KEY;
         io:println("Inserted row count: " + count);
-        io:println("Generated key: " + ids[0]);
+        io:println("Generated key: " + generatedKey);
     } else {
         io:println("Insert to table failed: " + <string>retWithKey.detail().message);
     }
@@ -137,10 +138,10 @@ public function main() {
     handleUpdate(ret, "Drop table student");
 }
 
-// Function to handle return value of the `update` remote function.
-function handleUpdate(int|error returned, string message) {
-    if (returned is int) {
-        io:println(message + " status: " + returned);
+// Function to handle the return value of the `update` remote function.
+function handleUpdate(sql:UpdateResult|error returned, string message) {
+    if (returned is sql:UpdateResult) {
+        io:println(message + " status: " + returned.updatedRowCount);
     } else {
         io:println(message + " failed: " + <string>returned.detail().message);
     }

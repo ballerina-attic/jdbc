@@ -6,11 +6,10 @@ import ballerinax/jdbc;
 jdbc:Client testDB = new({
         url: "jdbc:mysql://localhost:3306/StreamTestDB",
         username: "test",
-        password: "test",
-        poolOptions: { maximumPoolSize: 5 }
+        password: "test"
     });
 
-// Create an HTTP service and bind to a listener on port 9090
+// Create an HTTP service and bind it to a listener on port 9090
 service dataService on new http:Listener(9090) {
 
     resource function getData(http:Caller caller, http:Request req) {
