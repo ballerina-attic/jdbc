@@ -32,9 +32,6 @@ public type ClientEndpointConfig record {|
 |};
 
 # Represents a JDBC SQL client endpoint.
-#
-# + config - The configurations associated with the SQL endpoint
-# + sqlClient - The base SQL Client
 public type Client client object {
     *sql:AbstractSQLClient;
     private sql:Client sqlClient;
