@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS DataTypeTable(
   smallint_type SMALLINT,
   clob_type    CLOB,
   binary_type  BINARY(27),
+  bit_type     BIT(64),
   PRIMARY KEY (row_id)
 );
 /
@@ -99,7 +100,7 @@ CREATE PROCEDURE SelectPersonDataMultiple()
 CREATE PROCEDURE TestOutParams (IN id INT, OUT paramInt INT, OUT paramBigInt BIGINT, OUT paramFloat FLOAT,
   OUT paramDouble DOUBLE, OUT paramBool BOOLEAN, OUT paramString VARCHAR(50),OUT paramNumeric NUMERIC(10,3),
   OUT paramDecimal DECIMAL(10,3), OUT paramReal REAL, OUT paramTinyInt TINYINT,
-  OUT paramSmallInt SMALLINT, OUT paramClob CLOB, OUT paramBinary BINARY(27))
+  OUT paramSmallInt SMALLINT, OUT paramClob CLOB, OUT paramBinary BINARY(27), OUT paramBit BIT(64))
   READS SQL DATA
   BEGIN ATOMIC
   SELECT int_type INTO paramInt FROM DataTypeTable where row_id = id;
@@ -115,18 +116,19 @@ CREATE PROCEDURE TestOutParams (IN id INT, OUT paramInt INT, OUT paramBigInt BIG
   SELECT smallint_type INTO paramSmallInt FROM DataTypeTable where row_id = id;
   SELECT clob_type INTO paramClob FROM DataTypeTable where row_id = id;
   SELECT binary_type INTO paramBinary FROM DataTypeTable where row_id = id;
+  SELECT bit_type INTO paramBit FROM DataTypeTable where row_id = id;
   END
 /
 CREATE PROCEDURE TestINOUTParams (IN id INT, INOUT paramInt INT, INOUT paramBigInt BIGINT, INOUT paramFloat FLOAT,
   INOUT paramDouble DOUBLE, INOUT paramBool BOOLEAN, INOUT paramString VARCHAR(50),
   INOUT paramNumeric NUMERIC(10,3), INOUT paramDecimal DECIMAL(10,3), INOUT paramReal REAL, INOUT paramTinyInt TINYINT,
-  INOUT paramSmallInt SMALLINT, INOUT paramClob CLOB, INOUT paramBinary BINARY(27))
+  INOUT paramSmallInt SMALLINT, INOUT paramClob CLOB, INOUT paramBinary BINARY(27), INOUT paramBit BIT(64))
   MODIFIES SQL DATA
   BEGIN ATOMIC
   INSERT INTO DataTypeTable (row_id, int_type, long_type, float_type, double_type, boolean_type, string_type,
-     numeric_type, decimal_type, real_type, tinyint_type, smallint_type, clob_type, binary_type)
+     numeric_type, decimal_type, real_type, tinyint_type, smallint_type, clob_type, binary_type, bit_type)
      VALUES (id, paramInt, paramBigInt, paramFloat, paramDouble, paramBool, paramString, paramNumeric, paramDecimal,
-     paramReal, paramTinyInt, paramSmallInt, paramClob, paramBinary);
+     paramReal, paramTinyInt, paramSmallInt, paramClob, paramBinary, paramBit);
 
   SELECT int_type INTO paramInt FROM DataTypeTable where row_id = id;
   SELECT long_type INTO paramBigInt FROM DataTypeTable where row_id = id;
@@ -141,6 +143,7 @@ CREATE PROCEDURE TestINOUTParams (IN id INT, INOUT paramInt INT, INOUT paramBigI
   SELECT smallint_type INTO paramSmallInt FROM DataTypeTable where row_id = id;
   SELECT clob_type INTO paramClob FROM DataTypeTable where row_id = id;
   SELECT binary_type INTO paramBinary FROM DataTypeTable where row_id = id;
+  SELECT bit_type INTO paramBit FROM DataTypeTable where row_id = id;
   END
 /
 CREATE PROCEDURE TestOUTINOUTParamsBlob (IN idOut INT, IN idInOut INT, OUT paramBlobOut BLOB, INOUT paramBlobInOut BLOB)

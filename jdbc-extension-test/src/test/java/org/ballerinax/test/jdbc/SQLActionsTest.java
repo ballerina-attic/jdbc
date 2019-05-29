@@ -305,7 +305,7 @@ public class SQLActionsTest {
     @Test(groups = {CONNECTOR_TEST, H2_NOT_SUPPORTED})
     public void testOutParameters() {
         BValue[] returns = BRunUtil.invoke(result, "testOutParameters", connectionArgs);
-        Assert.assertEquals(returns.length, 13);
+        Assert.assertEquals(returns.length, 14);
         Assert.assertEquals(((BInteger) returns[0]).intValue(), 10);
         Assert.assertEquals(((BInteger) returns[1]).intValue(), 9223372036854774807L);
         Assert.assertEquals(((BFloat) returns[2]).floatValue(), 123.34D, DELTA);
@@ -332,7 +332,7 @@ public class SQLActionsTest {
     @Test(groups = {CONNECTOR_TEST, H2_NOT_SUPPORTED})
     public void testNullOutParameters() {
         BValue[] returns = BRunUtil.invoke(result, "testNullOutParameters", connectionArgs);
-        Assert.assertEquals(returns.length, 13);
+        Assert.assertEquals(returns.length, 14);
         Assert.assertEquals(((BInteger) returns[0]).intValue(), 0);
         Assert.assertEquals(((BInteger) returns[1]).intValue(), 0);
         Assert.assertEquals(((BFloat) returns[2]).floatValue(), 0.0D);
@@ -407,7 +407,7 @@ public class SQLActionsTest {
     @Test(groups = {CONNECTOR_TEST, H2_NOT_SUPPORTED})
     public void testINOutParameters() {
         BValue[] returns = BRunUtil.invoke(result, "testINOutParameters", connectionArgs);
-        Assert.assertEquals(returns.length, 13);
+        Assert.assertEquals(returns.length, 14);
         Assert.assertEquals(((BInteger) returns[0]).intValue(), 10);
         Assert.assertEquals(((BInteger) returns[1]).intValue(), 9223372036854774807L);
         Assert.assertEquals(((BFloat) returns[2]).floatValue(), 123.34D, DELTA);
@@ -426,7 +426,7 @@ public class SQLActionsTest {
     @Test(groups = {CONNECTOR_TEST, H2_NOT_SUPPORTED})
     public void testNullINOutParameters() {
         BValue[] returns = BRunUtil.invoke(result, "testNullINOutParameters", connectionArgs);
-        Assert.assertEquals(returns.length, 13);
+        Assert.assertEquals(returns.length, 14);
         Assert.assertEquals(((BInteger) returns[0]).intValue(), 0);
         Assert.assertEquals(((BInteger) returns[1]).intValue(), 0);
         Assert.assertEquals(((BFloat) returns[2]).floatValue(), 0.0D);

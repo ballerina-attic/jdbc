@@ -565,7 +565,7 @@ function testArrayInParameters(string jdbcUrl, string userName, string password)
 }
 
 function testOutParameters(string jdbcUrl, string userName, string password) returns (any, any, any, any, any, any, any,
-            any, any, any, any, any, any) {
+            any, any, any, any, any, any, any) {
     jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
@@ -587,6 +587,7 @@ function testOutParameters(string jdbcUrl, string userName, string password) ret
     sql:Parameter paraSmallInt = { sqlType: sql:TYPE_SMALLINT, direction: sql:DIRECTION_OUT };
     sql:Parameter paraClob = { sqlType: sql:TYPE_CLOB, direction: sql:DIRECTION_OUT };
     sql:Parameter paraBinary = { sqlType: sql:TYPE_BINARY, direction: sql:DIRECTION_OUT };
+    sql:Parameter paramBit = { sqlType: sql:TYPE_BINARY, direction: sql:DIRECTION_OUT };
 
     if (jdbcUrl.contains("postgres")) {
         // There is no CLOB type in postgres. Therefore have to use TEXT type instead.
@@ -600,15 +601,15 @@ function testOutParameters(string jdbcUrl, string userName, string password) ret
         paraTinyInt = { sqlType: sql:TYPE_SMALLINT, direction: sql:DIRECTION_OUT };
     }
 
-    var ret = testDB->call("{call TestOutParams(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (),
+    var ret = testDB->call("{call TestOutParams(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (),
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
-        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
+        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary, paramBit);
 
     error? stopRet = testDB.stop();
 
     return (paraInt.value, paraLong.value, paraFloat.value, paraDouble.value, paraBool.value, paraString.value,
     paraNumeric.value, paraDecimal.value, paraReal.value, paraTinyInt.value, paraSmallInt.value, paraClob.value,
-    paraBinary.value);
+    paraBinary.value, paramBit.value);
 }
 
 function testBlobOutInOutParameters(string jdbcUrl, string userName, string password) returns (any, any) {
@@ -635,7 +636,7 @@ function testBlobOutInOutParameters(string jdbcUrl, string userName, string pass
 }
 
 function testNullOutParameters(string jdbcUrl, string userName, string password) returns (any, any, any, any, any, any,
-            any, any, any, any, any, any, any) {
+            any, any, any, any, any, any, any, any) {
     jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
@@ -657,6 +658,7 @@ function testNullOutParameters(string jdbcUrl, string userName, string password)
     sql:Parameter paraSmallInt = { sqlType: sql:TYPE_SMALLINT, direction: sql:DIRECTION_OUT };
     sql:Parameter paraClob = { sqlType: sql:TYPE_CLOB, direction: sql:DIRECTION_OUT };
     sql:Parameter paraBinary = { sqlType: sql:TYPE_BINARY, direction: sql:DIRECTION_OUT };
+    sql:Parameter paramBit = { sqlType: sql:TYPE_BINARY, direction: sql:DIRECTION_OUT };
 
     if (jdbcUrl.contains("postgres")) {
         // There is no CLOB type in postgres. Therefore have to use TEXT type instead.
@@ -670,13 +672,13 @@ function testNullOutParameters(string jdbcUrl, string userName, string password)
         paraTinyInt = { sqlType: sql:TYPE_SMALLINT, direction: sql:DIRECTION_OUT };
     }
 
-    var ret = testDB->call("{call TestOutParams(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (),
+    var ret = testDB->call("{call TestOutParams(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (),
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
-        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
+        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary, paramBit);
     error? stopRet = testDB.stop();
     return (paraInt.value, paraLong.value, paraFloat.value, paraDouble.value, paraBool.value, paraString.value,
     paraNumeric.value, paraDecimal.value, paraReal.value, paraTinyInt.value, paraSmallInt.value, paraClob.value,
-    paraBinary.value);
+    paraBinary.value, paramBit.value);
 }
 
 function testNullOutInOutBlobParameters(string jdbcUrl, string userName, string password) returns (any, any) {
@@ -723,6 +725,9 @@ function testINParameters(string jdbcUrl, string userName, string password) retu
     sql:Parameter paraClob = { sqlType: sql:TYPE_CLOB, value: "very long text" };
     sql:Parameter paraBinary = { sqlType: sql:TYPE_BINARY, value: "d3NvMiBiYWxsZXJpbmEgYmluYXJ5IHRlc3Qu" };
 
+    byte[] byteArray = [1, 2, 3];
+    sql:Parameter paraBit = { sqlType: sql:TYPE_BINARY, value: byteArray};
+
     if (jdbcUrl.contains("postgres")) {
         // In postgres there is no Clob type. TEXT type can be used instead.
         paraClob = { sqlType: sql:TYPE_VARCHAR, value: "very long text" };
@@ -730,9 +735,9 @@ function testINParameters(string jdbcUrl, string userName, string password) retu
 
     var ret = testDB->update("INSERT INTO DataTypeTable (row_id,int_type, long_type,
             float_type, double_type, boolean_type, string_type, numeric_type, decimal_type, real_type, tinyint_type,
-            smallint_type, clob_type, binary_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            smallint_type, clob_type, binary_type, bit_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
-        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
+        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary, paraBit);
     int insertCount = getIntResult(ret);
     error? stopRet = testDB.stop();
     return insertCount;
@@ -801,8 +806,9 @@ function testINParametersWithDirectValues(string jdbcUrl, string userName, strin
     });
 
     var result = testDB->update("INSERT INTO DataTypeTable (row_id, int_type, long_type, float_type,
-        double_type, boolean_type, string_type, numeric_type, decimal_type, real_type) VALUES (?,?,?,?,?,?,?,?,?,?)",
-        25, 1, 9223372036854774807, 123.34, 2139095039.1, true, "Hello", 1234.567, 1234.567, 1234.567);
+        double_type, boolean_type, string_type, numeric_type, decimal_type, real_type, bit_type)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?)", 25, 1, 9223372036854774807, 123.34, 2139095039.1, true, "Hello", 1234.567,
+        1234.567, 1234.567, [1, 2]);
     int insertCount = -1;
     if (result is sql:UpdateResult) {
         insertCount = result.updatedRowCount;
@@ -857,11 +863,12 @@ function testINParametersWithDirectVariables(string jdbcUrl, string userName, st
     decimal numericType = 1234.567;
     decimal decimalType = 1234.567;
     float realType = 1234.567;
+    byte[] byteArray = [1, 2];
 
     var result = testDB->update("INSERT INTO DataTypeTable (row_id, int_type, long_type,
-            float_type, double_type, boolean_type, string_type, numeric_type, decimal_type, real_type)
-            VALUES (?,?,?,?,?,?,?,?,?,?)", rowid, intType, longType, floatType, doubleType, boolType,
-            stringType, numericType, decimalType, realType);
+            float_type, double_type, boolean_type, string_type, numeric_type, decimal_type, real_type, bit_type)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?)", rowid, intType, longType, floatType, doubleType, boolType,
+            stringType, numericType, decimalType, realType, byteArray);
     int insertCount = -1;
     if (result is sql:UpdateResult) {
         insertCount = result.updatedRowCount;
@@ -920,12 +927,13 @@ function testNullINParameterValues(string jdbcUrl, string userName, string passw
     sql:Parameter paraSmallInt = { sqlType: sql:TYPE_SMALLINT, value: () };
     sql:Parameter paraClob = { sqlType: sql:TYPE_CLOB, value: () };
     sql:Parameter paraBinary = { sqlType: sql:TYPE_BINARY, value: () };
+    sql:Parameter paraBit = { sqlType: sql:TYPE_BINARY, value: () };
 
     var result = testDB->update("INSERT INTO DataTypeTable (row_id, int_type, long_type,
             float_type, double_type, boolean_type, string_type, numeric_type, decimal_type, real_type, tinyint_type,
-            smallint_type, clob_type, binary_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            smallint_type, clob_type, binary_type, bit_type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
-        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
+        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary, paraBit);
     int insertCount = -1;
     if (result is sql:UpdateResult) {
         insertCount = result.updatedRowCount;
@@ -956,7 +964,7 @@ function testNullINParameterBlobValue(string jdbcUrl, string userName, string pa
 }
 
 function testINOutParameters(string jdbcUrl, string userName, string password) returns (any, any, any, any, any, any,
-            any, any, any, any, any, any, any) {
+            any, any, any, any, any, any, any, any) {
     jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
@@ -980,6 +988,8 @@ function testINOutParameters(string jdbcUrl, string userName, string password) r
     sql:Parameter paraBinary = { sqlType: sql:TYPE_BINARY, value: "d3NvMiBiYWxsZXJpbmEgYmluYXJ5IHRlc3Qu", direction: sql
     :
     DIRECTION_INOUT };
+    byte[] byteArray = [1, 2, 3];
+    sql:Parameter paramBit = { sqlType: sql:TYPE_BINARY, value: byteArray, direction: sql:DIRECTION_INOUT };
 
     if (jdbcUrl.contains("postgres")) {
         paraClob = { sqlType: sql:TYPE_VARCHAR, value: "very long text", direction: sql:DIRECTION_INOUT };
@@ -992,17 +1002,17 @@ function testINOutParameters(string jdbcUrl, string userName, string password) r
         paraTinyInt = { sqlType: sql:TYPE_SMALLINT, value: 1, direction: sql:DIRECTION_INOUT };
     }
 
-    var ret = testDB->call("{call TestINOUTParams(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (),
+    var ret = testDB->call("{call TestINOUTParams(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (),
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
-        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
+        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary, paramBit);
     error? stopRet = testDB.stop();
     return (paraInt.value, paraLong.value, paraFloat.value, paraDouble.value, paraBool.value, paraString.value,
     paraNumeric.value, paraDecimal.value, paraReal.value, paraTinyInt.value, paraSmallInt.value, paraClob.value,
-    paraBinary.value);
+    paraBinary.value, paramBit.value);
 }
 
 function testNullINOutParameters(string jdbcUrl, string userName, string password) returns (any, any, any, any, any, any
-            , any, any, any, any, any, any, any) {
+            , any, any, any, any, any, any, any, any) {
     jdbc:Client testDB = new({
         url: jdbcUrl,
         username: userName,
@@ -1024,6 +1034,7 @@ function testNullINOutParameters(string jdbcUrl, string userName, string passwor
     sql:Parameter paraSmallInt = { sqlType: sql:TYPE_SMALLINT, direction: sql:DIRECTION_INOUT };
     sql:Parameter paraClob = { sqlType: sql:TYPE_CLOB, direction: sql:DIRECTION_INOUT };
     sql:Parameter paraBinary = { sqlType: sql:TYPE_BINARY, direction: sql:DIRECTION_INOUT };
+    sql:Parameter paramBit = { sqlType: sql:TYPE_BINARY, direction: sql:DIRECTION_INOUT };
 
     if (jdbcUrl.contains("postgres")) {
         paraClob = { sqlType: sql:TYPE_VARCHAR, direction: sql:DIRECTION_INOUT };
@@ -1036,13 +1047,13 @@ function testNullINOutParameters(string jdbcUrl, string userName, string passwor
         paraTinyInt = { sqlType: sql:TYPE_SMALLINT, direction: sql:DIRECTION_INOUT };
     }
 
-    var ret = testDB->call("{call TestINOUTParams(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (),
+    var ret = testDB->call("{call TestINOUTParams(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}", (),
         paraID, paraInt, paraLong, paraFloat, paraDouble, paraBool, paraString, paraNumeric,
-        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary);
+        paraDecimal, paraReal, paraTinyInt, paraSmallInt, paraClob, paraBinary, paramBit);
     error? stopRet = testDB.stop();
     return (paraInt.value, paraLong.value, paraFloat.value, paraDouble.value, paraBool.value, paraString.value,
     paraNumeric.value, paraDecimal.value, paraReal.value, paraTinyInt.value, paraSmallInt.value, paraClob.value,
-    paraBinary.value);
+    paraBinary.value, paramBit.value);
 }
 
 function testEmptySQLType(string jdbcUrl, string userName, string password) returns (int) {
