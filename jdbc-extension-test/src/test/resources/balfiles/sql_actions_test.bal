@@ -806,9 +806,9 @@ function testINParametersWithDirectValues(string jdbcUrl, string userName, strin
     });
 
     var result = testDB->update("INSERT INTO DataTypeTable (row_id, int_type, long_type, float_type,
-        double_type, boolean_type, string_type, numeric_type, decimal_type, real_type, bit_type)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?)", 25, 1, 9223372036854774807, 123.34, 2139095039.1, true, "Hello", 1234.567,
-        1234.567, 1234.567, [1, 2]);
+        double_type, boolean_type, string_type, numeric_type, decimal_type, real_type,
+        bit_type) VALUES (?,?,?,?,?,?,?,?,?,?,?)", 25, 1, 9223372036854774807, 123.34, 2139095039.1, true, "Hello",
+        1234.567, 1234.567, 1234.567, [1, 2]);
     int insertCount = -1;
     if (result is sql:UpdateResult) {
         insertCount = result.updatedRowCount;
@@ -866,8 +866,8 @@ function testINParametersWithDirectVariables(string jdbcUrl, string userName, st
     byte[] byteArray = [1, 2];
 
     var result = testDB->update("INSERT INTO DataTypeTable (row_id, int_type, long_type,
-            float_type, double_type, boolean_type, string_type, numeric_type, decimal_type, real_type, bit_type)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?)", rowid, intType, longType, floatType, doubleType, boolType,
+            float_type, double_type, boolean_type, string_type, numeric_type, decimal_type, real_type,
+            bit_type) VALUES (?,?,?,?,?,?,?,?,?,?,?)", rowid, intType, longType, floatType, doubleType, boolType,
             stringType, numericType, decimalType, realType, byteArray);
     int insertCount = -1;
     if (result is sql:UpdateResult) {
