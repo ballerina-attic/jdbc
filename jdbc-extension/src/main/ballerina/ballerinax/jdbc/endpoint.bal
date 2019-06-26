@@ -114,7 +114,7 @@ public type Client client object {
     }
 
     function handleStoppedClientInvocation() returns error {
-        return error("{ballerina/sql}DatabaseError", { message: "Client has been stopped"});
+        return error("{ballerina/sql}DatabaseError", message = "Client has been stopped");
     }
 };
 
